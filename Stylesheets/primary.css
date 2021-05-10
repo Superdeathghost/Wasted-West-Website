@@ -1,0 +1,72 @@
+html { height: 100%; width: 100%; }
+body { 
+    background-image: linear-gradient(to bottom, yellow, burlywood);
+    /* For cross-brower support. */
+    background-image: -o-linear-gradient(to bottom, yellow, burlywood);
+    background-image: -moz-linear-gradient(to bottom, yellow, burlywood);
+    background-image: -webkit-linear-gradient(to bottom, yellow, burlywood);
+
+    font-family: Copperplate, Papyrus, fantasy; 
+    font-size: 16px; 
+    margin: 0;
+}
+
+/* Head Area */
+div#headArea { 
+    background-image: linear-gradient(to right, lightblue, gray);
+    /* For cross-brower support. */
+    background-image: -o-linear-gradient(to right, lightblue, gray);
+    background-image: -moz-linear-gradient(to right, lightblue, gray);
+    background-image: -webkit-linear-gradient(to right, lightblue, gray);
+
+    width: 100%;
+    height: auto;
+}
+
+/* Title Link */
+a#titleLink { text-decoration: none; }
+a#titleLink:hover, :focus { text-decoration: underline; }
+h1#mainTitle { 
+    color: black;
+    font-style: italic;
+    margin: 0; 
+    padding: 0.5em; 
+}
+
+/* Main Mav */
+nav#mainNav {
+    position: sticky;
+    position: -webkit-sticky;
+    width: 100%;
+    height: auto;
+}
+nav#mainNav ul { 
+    background-color: black; 
+    list-style-type: none; 
+    margin: 0; 
+    padding: 0;
+    overflow: hidden;
+}
+li.mainNav-Piece {
+    float: left; 
+    clear: right; 
+}
+li.mainNav-Piece a { 
+    color: white;
+    display: block; 
+    font-weight: normal;
+    text-align: center;
+    text-decoration: none;
+    padding: 0.75em 1em;
+}
+li.mainNav-Piece a:hover, li.mainNav-Piece a:focus {
+    background-color: white;
+    color: black;
+    text-decoration: underline;
+}
+li.mainNav-Piece a:active {
+    background-color: rgb(200, 200, 200);
+}
+
+/* Main Area */
+div#mainArea { margin: 1em 5em; background-color: gray; }
