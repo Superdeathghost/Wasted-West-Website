@@ -22,10 +22,6 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	if ( canvas === undefined ) console.err( "Your browser does not support Canvas." );
 	if ( gl === undefined ) console.err( "Your browser does not suppport WebGL." );
 	console.log( gl.getParameter( gl.VERSION ) );
-
-	// initial resize before we do anything
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
 	
 	let cw = canvas.width / 2;
 	let ch = canvas.height / 2;
@@ -368,8 +364,9 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 
 		// Apparently Pale Moon doesn't support CSS min, so we're doing it with JS.
 		const left_val = Math.min( window.innerWidth * 0.3, window.innerWidth * 0.5 - 360 );
-		document.getElementById( "nav-menu" ).style.left = left_val + "px";
-		document.getElementById( "link-home" ).style.left = left_val + "px";
+		const width_val = Math.max( window.innerWidth * 0.4, 720 );
+		document.documentElement.style.setProperty( '--home-width', width_val + "px" );
+		document.documentElement.style.setProperty( '--home-left', left_val + "px" );
 
 		size_fbs();
 		bkgd.scale();
@@ -395,38 +392,88 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		llam.reset();
 	};
 
-	const about = document.getElementById( "link-about" );
-	const listen = document.getElementById( "link-listen" );
-	const cast = document.getElementById( "link-cast" );
-	const contact = document.getElementById( "link-contact" );
-	const menu = document.getElementById( "nav-menu" );
+	{	// Isolating the nav related stuff in it's own scope
+		const about = document.getElementById( "link-about" );
+		const listen = document.getElementById( "link-listen" );
+		const cast = document.getElementById( "link-cast" );
+		const contact = document.getElementById( "link-contact" );
+		const menu = document.getElementById( "nav-menu" );
+		const home = document.getElementById( "link-home" );
+		const page_about = document.getElementById( "page-about" );
+		const page_listen = document.getElementById( "page-listen" );
+		const page_cast = document.getElementById( "page-cast" );
+		const page_contact = document.getElementById( "page-contact" );
 
-	const nav_in = () => {
-		about.classList.add( 'fade-out' );
-		listen.classList.add( 'fade-out' );
-		cast.classList.add( 'fade-out' );
-		contact.classList.add( 'fade-out' );
+		const nav_out = ( page ) => {
+			page.classList.remove( 'fade-in' );
+			page.classList.add( 'fade-out' );
+			page.style.opacity = 0;
 
-		about.style.opacity = 0;
-		listen.style.opacity = 0;
-		cast.style.opacity = 0;
-		contact.style.opacity = 0;
+			setTimeout( () => { canvas.classList.remove( 'fade-out-part' ); canvas.classList.add( 'fade-in-part' ); }, 200 );
+			setTimeout( () => { menu.style.display = 'flex'; page.style.display = 'none'; }, 300 );
+			setTimeout( () => {
+				home.classList.remove( 'grow-hori' );
+				home.classList.add( 'shrink-hori' );
+				home.style.width = "var(--home-width)";
+				home.style.left = "var(--home-left)";
+			}, 400 );
+			setTimeout( () => { menu.classList.remove( 'shrink-vert' ); menu.classList.add( 'grow-vert' ); }, 500 );
+			setTimeout( () => {
+				about.classList.remove( 'fade-out' );
+				listen.classList.remove( 'fade-out' );
+				cast.classList.remove( 'fade-out' );
+				contact.classList.remove( 'fade-out' );
 
-		setTimeout( () => { menu.classList.add( 'shrink' ) },  200 );
-	};
+				about.classList.add( 'fade-in' );
+				listen.classList.add( 'fade-in' );
+				cast.classList.add( 'fade-in' );
+				contact.classList.add( 'fade-in' );
+			}, 700 );
+			home.removeEventListener( 'click' );
+			about.addEventListener( "click", ( e ) => { nav_in(page_about); } );
+			listen.addEventListener( "click", ( e ) => { nav_in(page_listen); } );
+			cast.addEventListener( "click", ( e ) => { nav_in(page_cast); } );
+			contact.addEventListener( "click", ( e ) => { nav_in(page_contact); } );
+		}
 
-	about.addEventListener( "click", ( e ) => {
-		nav_in();
-	} );
-	listen.addEventListener( "click", ( e ) => {
-		nav_in();
-	} );
-	cast.addEventListener( "click", ( e ) => {
-		nav_in();
-	} );
-	contact.addEventListener( "click", ( e ) => {
-		nav_in();
-	} );
+		const nav_in = ( page ) => {
+			about.classList.remove( 'fade-in' );
+			listen.classList.remove( 'fade-in' );
+			cast.classList.remove( 'fade-in' );
+			contact.classList.remove( 'fade-in' );
+
+			about.classList.add( 'fade-out' );
+			listen.classList.add( 'fade-out' );
+			cast.classList.add( 'fade-out' );
+			contact.classList.add( 'fade-out' );
+
+			setTimeout( () => { menu.classList.remove( 'grow-vert' ); menu.classList.add( 'shrink-vert' ); }, 200 );
+			setTimeout( () => {
+				home.classList.remove( 'shrink-hori' );
+				home.classList.add( 'grow-hori' );
+				home.style.width = "100vw";
+				home.style.left = "0";
+			}, 300 );
+			setTimeout( () => { canvas.classList.remove( 'fade-in-part' ); canvas.classList.add( 'fade-out-part' ); }, 500 );
+			setTimeout( () => {
+				menu.style.display = 'none';
+				page.classList.remove( 'fade-out' );
+				page.classList.add( 'fade-in' );
+				page.style.display = 'block';
+				page.style.opacity = 1;
+			}, 700 );
+			home.addEventListener( 'click', ( e ) => { nav_out( page ) } );
+			about.removeEventListener( "click", );
+			listen.removeEventListener( "click", );
+			cast.removeEventListener( "click", );
+			contact.removeEventListener( "click", );
+		};
+
+		about.addEventListener( "click", ( e ) => { nav_in(page_about); } );
+		listen.addEventListener( "click", ( e ) => { nav_in(page_listen); } );
+		cast.addEventListener( "click", ( e ) => { nav_in(page_cast); } );
+		contact.addEventListener( "click", ( e ) => { nav_in(page_contact); } );
+	}
 
 	resize();
 	window.onresize = resize;
@@ -466,6 +513,6 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 // 	fg_image.crossOrigin = 'anonymous';
 
 	mid_image.src = "../Assets/for_editing/derived/fg_mid.png";
-	bk_image.src = "../Assets/test/bkgd.jpg";
+	bk_image.src = "../Assets/for_editing/robert-bye-N1tdrse98Qg-unsplash.jpg";
 }
 
