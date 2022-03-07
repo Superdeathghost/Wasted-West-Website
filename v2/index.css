@@ -1,8 +1,4 @@
 
-::root {
-	--home-width: max( 40%, 720px );
-	--home-left: min( 30%, ( 100% - 720px ) / 2 );
-}
 
 /* used for page transition */
 @keyframes fade_in {
@@ -20,32 +16,6 @@
 .fade-out {
 	animation: fade_out 0.3s ease;
 	opacity: 0;
-}
-
-.shrink-vert {
-    transform-origin: 50% 0%;
-    transform: scale3d(1, 0, 1);
-    transition: transform 0.3s ease-in-out;
-}
-.grow-vert {
-    transform-origin: 50% 0%;
-    transform: scale3d(1, 1, 1);
-    transition: transform 0.3s ease-in-out;
-}
-
-@keyframes width-shrink {
-	from { width: 100vw; left: 0; }
-	to { width: var(--home-width); left:var(--home-left); }
-}
-@keyframes width-grow {
-	from { width: var(--home-width); left: var(--home-left); }
-	to { width: 100vw; left: 0; }
-}
-.shrink-hori {
-    animation: width-shrink 0.3s ease;
-}
-.grow-hori {
-    animation: width-grow 0.3s ease;
 }
 
 @keyframes fade_in_part {
@@ -74,7 +44,7 @@
 }
 
 body {
-	background-color: #eacba3;
+	background-color: #9ab5bc;
 }
 
 a {
@@ -106,16 +76,15 @@ a {
 
 /* nav */
 #nav {
-	font-size: 38px;
+	font-size: 2.4em;
 	width: 100%;
 	height: auto;
 }
 
 #nav-menu {
 	position: relative;
-	width: 40%;
-	min-width: 720px;
-	left: min( 30%, ( 100% - 720px ) / 2 );
+	width: 1024px;
+	left: 0;
 	display: flex;
 	justify-content: center;
 /* 	background-image: linear-gradient( to bottom, rgba(136, 221, 247, 0.4), rgba(136, 221, 247, 0.6) ); */
@@ -123,7 +92,7 @@ a {
 }
 
 .menu-link {
-    font-family: 'Libre Baskerville', serif;
+    font-family: 'Alata';
 }
 
 #nav-menu li {
@@ -133,17 +102,17 @@ a {
 
 #link-home {
 	position: relative;
-	width: var(--home-width);
-	left: var(--home-left);
-	font-size: 96px;
-	padding: 12px 0 24px 0;
+	width: 1024px;
+	left: 0;
+	font-size: 2.6em;
+	padding: 32px 0 12px 0;
 	display: block;
 	text-align: center;
 /* 	background-image: linear-gradient( to bottom, rgba(255, 255, 255, 0.6), rgba(136, 221, 247, 0.4) ); */
 }
 
 #link-home span {
-    font-family: 'Oleo Script', cursive;
+    font-family: tit-font;
 	margin: 0;
 }
 
@@ -226,7 +195,42 @@ a {
 	height: auto;
 }
 
-#main div {
+#page-about, #page-listen, #page-contact, #page-cast {
 	opacity: 0;
 	display: none;
 }
+
+/* about style */
+#page-about {
+	margin: 1% 6% 2%;
+}
+
+#about-header {
+	text-align: center;
+	font-size: 2em;
+}
+
+#about-content {
+	margin: 40px;
+	display: flex;
+	align-items: flex-start;
+	float: left;
+	font-size: 1.4em;
+	justify-content: center;
+	align-content: center;
+}
+
+#about-content p {
+	margin: 2vw;
+	width: 40vw;
+}
+
+#about-img {
+	display: block;
+	min-width: 400px;
+	width: 20vw;
+	height: auto;
+	float: left;
+}
+
+
