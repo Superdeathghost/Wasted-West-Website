@@ -147,7 +147,7 @@ a {
 	margin: 0;
 }
 
-.link {
+a {
     cursor: pointer;
     position: relative;
     white-space: nowrap;
@@ -224,9 +224,103 @@ a {
 #main {
 	width: 100vw;
 	height: auto;
+
+	font-family: 'Montserrat';
+	font-size: 1.4em;
 }
 
-#main div {
+#main h1 {
+	font-family: 'Noto Serif Display';
+	font-size: 3em;
+	text-align: center;
+	margin-bottom: 2%;
+}
+
+.page-container {
+	margin: 0 6%;
+	font-family: 'Montserrat';
 	opacity: 0;
 	display: none;
 }
+
+@keyframes c_link_in { from { color: #000; } to { color: #444; } }
+@keyframes c_link_out { from { color: #444; } to { color: #000; } }
+#main a { animation: c_link_out 0.3s ease; color: #000; }
+#main a:hover { animation: c_link_in 0.3s ease; color: #444; }
+
+.align-hori {
+	display: flex;
+	justify-content: space-between;
+/* 	see if there's anything else */
+}
+
+/* contact style */
+#contact-list {
+	list-style: none;
+	margin-left: 4%;
+	margin-right: 4%;
+}
+
+#contact-form {
+	display: flex;
+	flex-direction: column;
+}
+
+#contact-list li {
+	margin: 16px 0;
+	font-size: 1.4em;
+}
+
+#contact-form * {
+	background: none;
+	outline: none;
+	font-family: 'Montserrat';
+	font-size: 1.2em;
+}
+
+#contact-form li, #contact-form span {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#contact-form li, #contact-form span {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#contact-form span { pointer-events: none; }
+
+.contact-fin {
+    transform-origin: 0% 50%;
+    transform: translate3d( 0, 0, 0 );
+    transition: transform 0.4s ease;
+}
+.contact-fout {
+    transform-origin: 0% 50%;
+    transform: translate3d( -100%, 0, 0 );
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 1, 1);
+}
+
+#contact-form .input {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	position: relative;
+}
+
+#contact-form li:focus {
+	content: '';
+}
+
+/*#contact-list li span {
+	display: inline-flex;
+	justify-content: space-between;
+	width: calc( 100% - 8px - 1.5em );
+}*/
+
+/*#contact-list li::before {
+	display: inline;
+	content: '';
+/* 	padding-right: 8px;
+}*/

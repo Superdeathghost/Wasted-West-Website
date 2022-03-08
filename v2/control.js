@@ -475,6 +475,28 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		contact.addEventListener( "click", ( e ) => { nav_in(page_contact); } );
 	}
 
+	{
+		const contact_inputs = document.getElementsByClassName( "input" );
+		for ( let i = 0; i < contact_inputs.length; i++ ) {
+			let _input = contact_inputs[ i ].children[ 0 ];
+			_input.value = '';
+			_input.addEventListener( 'focusin', ( e ) => {
+				let input = e.target;
+				let span = input.nextSibling;
+				if ( span.classList[ 0 ] !== 'contact-fout' )
+					span.classList.add( 'contact-fout' );
+			} );
+			_input.addEventListener( 'focusout', ( e ) => {
+				let input = e.target;
+				let span = input.nextSibling;
+				if ( input.value === '' ) {
+					span.classList.remove( 'contact-fout' );
+					span.classList.add( 'contact-fin' );
+				}
+			} );
+		}
+	}
+
 	resize();
 	window.onresize = resize;
 	window.onbeforeunload = leavepage;
