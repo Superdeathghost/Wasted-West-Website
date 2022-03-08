@@ -5,11 +5,11 @@
 		<title>Template</title>
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-		<link rel="stylesheet" type="text/css" href="index.css">
+		<link rel="stylesheet" type="text/css" href="index.css" />
 <!-- 		<link rel="stylesheet" type="text/css" href="../LineHoverStyles-main/css/base.css"> -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=Montserrat:wght@400;600&family=Oleo+Script&family=Syne+Tactile&display=swap" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&family=Montserrat:wght@400;600&family=Oleo+Script&family=Syne+Tactile&family=Noto+Serif+Display:wght@300&display=swap" rel="stylesheet" />
 
 	</head>
 	<body>
@@ -22,16 +22,32 @@
 					<ul id="nav-menu">
 						<li><a class="menu-link link link--metis" id="link-about">About</a></li>
 						<li><a class="menu-link link link--metis" id="link-listen">Listen</a></li>
-						<li><a class="menu-link link link--metis" id="link-contact">Contact<a></li>
-						<li><a class="menu-link link link--metis" id="link-cast">Cast<a></li>
+						<li><a class="menu-link link link--metis" id="link-contact">Contact</a></li>
+						<li><a class="menu-link link link--metis" id="link-cast">Cast</a></li>
 					</ul>
 				</div>
 
 				<div id="main">
-					<div id="page-about"><p>this is a test</p></div>
-					<div id="page-listen"><p>this is a test</p></div>
-					<div id="page-contact"><p>this is a test</p></div>
-					<div id="page-cast"><p>this is a test</p></div>
+					<div id="page-about" class="page-container"><p>this is a test</p></div>
+					<div id="page-listen" class="page-container"><p>this is a test</p></div>
+					<div id="page-contact" class="page-container">
+						<h1>Contact</h1>
+						<div class="align-hori">
+							<form id="contact-form">
+								<div class="input"><input value=""><span>Your Name</span></input></div>
+								<div class="input"><input value=""><span>Your Email</span></input></div>
+								<div class="input"><input value=""><span>Your Phone</span></input></div>
+								<div class="input"><input value=""><span>What's Up?</span></input></div>
+								<button id="contact-form-submit">Send</button>
+							</form>
+							<ul id="contact-list">
+								<li><span><a href="https://mail.google.com/mail/u/1/?view=cm&fs=1&to=therealwastedwest@gmail.com&tf=1" target="_blank" rel="noopener noreferrer">therealwastedwest@gmail.com</a></span></li>
+								<li><span><a href="therealwastedwest@gmail.com">jesus</a></span></li>
+								<li><span><a href="#">Put other stuff in here.</a></span></li>
+							</ul>
+						</div>
+					</div>
+					<div id="page-cast" class="page-container"><p>this is a test</p></div>
 				</div>
 			</div>
 
