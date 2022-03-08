@@ -324,8 +324,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		this.y = 0;
 	}
 
-	const llam = new Layer( __mid_image, 0.08, 0, -1, fbs.fb1, 1.5 );	// fbs.fb1 is on 3
-	const bkgd = new Layer( __bk_image, 0.06, 1, 3, null, 1 );
+// 	const llam = new Layer( __mid_image, 0.08, 0, -1, fbs.fb1, 1.5 );	// fbs.fb1 is on 3
+	const bkgd = new Layer( __bk_image, 0.06, 1, -1, null, 1 );
 
 	const animate = ( tNow ) => {
 		tDelta = tNow - tPrev;
@@ -337,8 +337,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		gl.bindFramebuffer( gl.FRAMEBUFFER, fbs.fb2 );
 		gl.clear( gl.COLOR_BUFFER_BIT );
 
-		llam.update();
-		llam.render();
+// 		llam.update();
+// 		llam.render();
 		bkgd.update();
 		bkgd.render();
 
@@ -370,7 +370,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 
 		size_fbs();
 		bkgd.scale();
-		llam.scale();
+// 		llam.scale();
 	};
 
 	const mousemove = ( e ) => {
@@ -389,7 +389,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		cancelAnimationFrame( animFrame );
 		mouseout();
 		bkgd.reset();
-		llam.reset();
+// 		llam.reset();
 	};
 
 	{	// Isolating the nav related stuff in it's own scope
@@ -404,75 +404,51 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		const page_cast = document.getElementById( "page-cast" );
 		const page_contact = document.getElementById( "page-contact" );
 
+		const about_e = ( e ) => { nav_in( page_about ); };
+		const listen_e = ( e ) => { nav_in( page_listen ); };
+		const cast_e = ( e ) => { nav_in( page_cast ); };
+		const contact_e = ( e ) => { nav_in( page_contact); };
+
 		const nav_out = ( page ) => {
 			page.classList.remove( 'fade-in' );
 			page.classList.add( 'fade-out' );
 			page.style.opacity = 0;
 
-			setTimeout( () => { canvas.classList.remove( 'fade-out-part' ); canvas.classList.add( 'fade-in-part' ); }, 200 );
-			setTimeout( () => { menu.style.display = 'flex'; page.style.display = 'none'; }, 300 );
 			setTimeout( () => {
-				home.classList.remove( 'grow-hori' );
-				home.classList.add( 'shrink-hori' );
-				home.style.width = "var(--home-width)";
-				home.style.left = "var(--home-left)";
-			}, 400 );
-			setTimeout( () => { menu.classList.remove( 'shrink-vert' ); menu.classList.add( 'grow-vert' ); }, 500 );
-			setTimeout( () => {
-				about.classList.remove( 'fade-out' );
-				listen.classList.remove( 'fade-out' );
-				cast.classList.remove( 'fade-out' );
-				contact.classList.remove( 'fade-out' );
+				canvas.classList.remove( 'fade-out-part' );
+				canvas.classList.add( 'fade-in-part' );
+			}, 200 );
+			setTimeout( () => { page.style.display = 'none'; }, 300 );
 
-				about.classList.add( 'fade-in' );
-				listen.classList.add( 'fade-in' );
-				cast.classList.add( 'fade-in' );
-				contact.classList.add( 'fade-in' );
-			}, 700 );
+			about.addEventListener( "click", about_e  );
+			listen.addEventListener( "click", listen_e );
+			cast.addEventListener( "click", cast_e );
+			contact.addEventListener( "click", contact_e );
 			home.removeEventListener( 'click' );
-			about.addEventListener( "click", ( e ) => { nav_in(page_about); } );
-			listen.addEventListener( "click", ( e ) => { nav_in(page_listen); } );
-			cast.addEventListener( "click", ( e ) => { nav_in(page_cast); } );
-			contact.addEventListener( "click", ( e ) => { nav_in(page_contact); } );
 		}
 
 		const nav_in = ( page ) => {
-			about.classList.remove( 'fade-in' );
-			listen.classList.remove( 'fade-in' );
-			cast.classList.remove( 'fade-in' );
-			contact.classList.remove( 'fade-in' );
+			canvas.classList.remove( 'fade-in-part' );
+			canvas.classList.add( 'fade-out-part' );
 
-			about.classList.add( 'fade-out' );
-			listen.classList.add( 'fade-out' );
-			cast.classList.add( 'fade-out' );
-			contact.classList.add( 'fade-out' );
-
-			setTimeout( () => { menu.classList.remove( 'grow-vert' ); menu.classList.add( 'shrink-vert' ); }, 200 );
 			setTimeout( () => {
-				home.classList.remove( 'shrink-hori' );
-				home.classList.add( 'grow-hori' );
-				home.style.width = "100vw";
-				home.style.left = "0";
-			}, 300 );
-			setTimeout( () => { canvas.classList.remove( 'fade-in-part' ); canvas.classList.add( 'fade-out-part' ); }, 500 );
-			setTimeout( () => {
-				menu.style.display = 'none';
 				page.classList.remove( 'fade-out' );
 				page.classList.add( 'fade-in' );
 				page.style.display = 'block';
 				page.style.opacity = 1;
-			}, 700 );
+			}, 200 );
+
 			home.addEventListener( 'click', ( e ) => { nav_out( page ) } );
-			about.removeEventListener( "click", );
-			listen.removeEventListener( "click", );
-			cast.removeEventListener( "click", );
-			contact.removeEventListener( "click", );
+			about.removeEventListener( "click", about_e  );
+			listen.removeEventListener( "click", listen_e );
+			cast.removeEventListener( "click", cast_e );
+			contact.removeEventListener( "click", contact_e );
 		};
 
-		about.addEventListener( "click", ( e ) => { nav_in(page_about); } );
-		listen.addEventListener( "click", ( e ) => { nav_in(page_listen); } );
-		cast.addEventListener( "click", ( e ) => { nav_in(page_cast); } );
-		contact.addEventListener( "click", ( e ) => { nav_in(page_contact); } );
+		about.addEventListener( "click", about_e  );
+		listen.addEventListener( "click", listen_e );
+		cast.addEventListener( "click", cast_e );
+		contact.addEventListener( "click", contact_e );
 	}
 
 	{
@@ -535,6 +511,6 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 // 	fg_image.crossOrigin = 'anonymous';
 
 	mid_image.src = "../Assets/for_editing/derived/fg_mid.png";
-	bk_image.src = "../Assets/for_editing/robert-bye-N1tdrse98Qg-unsplash.jpg";
+	bk_image.src = "../Assets/for_editing/ilse-orsel-5cKc2ryLj4g-unsplash.jpg";
 }
 
