@@ -392,66 +392,37 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 // 		llam.reset();
 	};
 
-	{	// Isolating the nav related stuff in it's own scope
-		const about = document.getElementById( "link-about" );
-		const listen = document.getElementById( "link-listen" );
-		const cast = document.getElementById( "link-cast" );
-		const contact = document.getElementById( "link-contact" );
-		const menu = document.getElementById( "nav-menu" );
+	{	// Menu navigation
+		const page_links = document.getElementsByClassName( "menu-link" );
+		const pages = document.getElementsByClassName( "page-container" );
 		const home = document.getElementById( "link-home" );
-		const page_about = document.getElementById( "page-about" );
-		const page_listen = document.getElementById( "page-listen" );
-		const page_cast = document.getElementById( "page-cast" );
-		const page_contact = document.getElementById( "page-contact" );
-
-		const about_e = ( e ) => { nav_in( page_about ); };
-		const listen_e = ( e ) => { nav_in( page_listen ); };
-		const cast_e = ( e ) => { nav_in( page_cast ); };
-		const contact_e = ( e ) => { nav_in( page_contact); };
+		const e_fn = ( e ) => {  };
 
 		const nav_out = ( page ) => {
-			page.classList.remove( 'fade-in' );
-			page.classList.add( 'fade-out' );
 			page.style.opacity = 0;
-
-			setTimeout( () => {
-				canvas.classList.remove( 'fade-out-part' );
-				canvas.classList.add( 'fade-in-part' );
-			}, 200 );
+			setTimeout( () => { canvas.style.opacity = 1; }, 200 );
 			setTimeout( () => { page.style.display = 'none'; }, 300 );
 
-			about.addEventListener( "click", about_e  );
-			listen.addEventListener( "click", listen_e );
-			cast.addEventListener( "click", cast_e );
-			contact.addEventListener( "click", contact_e );
-			home.removeEventListener( 'click' );
+			for ( let i = 0; i < page_links.length; i++ )
+				page_links[ i ].onclick = () => nav_in( pages[ i ] );
+			home.onclick = undefined;
 		}
 
 		const nav_in = ( page ) => {
-			canvas.classList.remove( 'fade-in-part' );
-			canvas.classList.add( 'fade-out-part' );
+			page.style.display = 'block';
+			canvas.style.opacity = 0.2;
+			setTimeout( () => { page.style.opacity = 1; }, 200 );
 
-			setTimeout( () => {
-				page.classList.remove( 'fade-out' );
-				page.classList.add( 'fade-in' );
-				page.style.display = 'block';
-				page.style.opacity = 1;
-			}, 200 );
-
-			home.addEventListener( 'click', ( e ) => { nav_out( page ) } );
-			about.removeEventListener( "click", about_e  );
-			listen.removeEventListener( "click", listen_e );
-			cast.removeEventListener( "click", cast_e );
-			contact.removeEventListener( "click", contact_e );
+			home.onclick = () => nav_out( page );
+			for ( let i = 0; i < page_links.length; i++ )
+				page_links[ i ].onclick = undefined;
 		};
 
-		about.addEventListener( "click", about_e  );
-		listen.addEventListener( "click", listen_e );
-		cast.addEventListener( "click", cast_e );
-		contact.addEventListener( "click", contact_e );
+		for ( let i = 0; i < page_links.length; i++ )
+			page_links[ i ].onclick = () => nav_in( pages[ i ] );
 	}
 
-	{
+	{	//
 		const contact_inputs = document.getElementsByClassName( "input" );
 		for ( let i = 0; i < contact_inputs.length; i++ ) {
 			let _input = contact_inputs[ i ].children[ 0 ];
@@ -473,6 +444,65 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		}
 	}
 
+	{	// carousel / slideshow stuff for cast
+		const car_buttons = document.getElementsByClassName( "car-button" );
+		const car_divs = document.getElementsByClassName( "car-div" );
+		let lnum = 0;
+
+		const nav_to = ( num ) => {
+			if ( num === lnum ) return;
+
+			for ( let i = 0; i < car_buttons.length; i++ ) {
+				car_buttons[ i ].onclick = undefined;
+				setTimeout( () => { car_buttons[ i ].onclick = ( e ) => { nav_to( i ); }; }, 370 );
+			}
+
+
+			car_divs[ lnum ].classList.remove( 'car-div-active' );
+			car_divs[ lnum ].classList.add( 'car-div-kill' );
+			car_divs[ lnum ].classList.add( 'car-div-disappear' );
+			let scope_bubble = () => {
+				const ld = car_divs[ lnum ];
+				return ( () => { ld.style.display = 'none'; } );
+			};
+			setTimeout( scope_bubble(), 300 );
+
+			car_divs[ num ].classList.remove( 'car-div-kill' );
+			car_divs[ num ].classList.remove( 'car-div-disappearr' );
+			car_divs[ num ].classList.remove( 'car-div-disappearl' );
+			car_divs[ num ].style.display = 'flex';
+
+			if ( num > lnum ) {
+				car_divs[ lnum ].classList.add( 'car-div-disappearl' );
+				car_divs[ num ].classList.add( 'car-div-setr' );
+			} else {
+				car_divs[ lnum ].classList.add( 'car-div-disappearr' );
+				car_divs[ num ].classList.add( 'car-div-setl' );
+			}
+
+			setTimeout( () => {
+				car_divs[ num ].classList.remove( 'car-div-setr' );
+				car_divs[ num ].classList.remove( 'car-div-setl' );
+				car_divs[ num ].classList.remove( 'car-div-disappear' );
+				car_divs[ num ].classList.add( 'car-div-active' );
+			}, 20 );
+
+			car_buttons[ lnum ].classList.remove( "car-active" );
+			car_buttons[ num ].classList.add( "car-active" );
+			lnum = num;
+		};
+
+		for ( let i = 0; i < car_buttons.length; i++ ) {
+			if ( i > 0 ) {
+				car_divs[ i ].classList.add( 'car-div-disappear' );
+				car_divs[ i ].style.display = 'none';
+			} else {
+				car_divs[ i ].style.display = 'flex';
+			}
+			car_buttons[ i ].onclick = ( e ) => { nav_to( i ); };
+		}
+	}
+
 	resize();
 	window.onresize = resize;
 	window.onbeforeunload = leavepage;
@@ -485,7 +515,6 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	// fade in
 	{
 		let content = document.getElementById( "content" );
-		content.classList.add( "fade-in" );
 		content.style.opacity = 1;
 	}
 };
