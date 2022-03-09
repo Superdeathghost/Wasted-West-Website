@@ -1,40 +1,4 @@
 
-
-/* used for page transition */
-@keyframes fade_in {
-	from { opacity: 0; }
-	to { opacity: 1; }
-}
-@keyframes fade_out {
-	from { opacity: 1; }
-	to { opacity: 0; }
-}
-.fade-in {
-	animation: fade_in 0.3s ease;
-	opacity: 1;
-}
-.fade-out {
-	animation: fade_out 0.3s ease;
-	opacity: 0;
-}
-
-@keyframes fade_in_part {
-	from { opacity: 0.2; }
-	to { opacity: 1; }
-}
-@keyframes fade_out_part {
-	from { opacity: 1; }
-	to { opacity: 0.2; }
-}
-.fade-in-part {
-	animation: fade_in_part 0.3s ease;
-	opacity: 1;
-}
-.fade-out-part {
-	animation: fade_out_part 0.3s ease;
-	opacity: 0.2;
-}
-
 /* general style */
 * {
 	margin: 0;
@@ -53,12 +17,14 @@ a {
 }
 
 #content {
+	transition: opacity 0.3s ease;
 	position: relative;
 	display: block;
 	opacity: 0;
 }
 
 #screen {
+	transition: opacity 0.3s ease;
 	position: relative;
 	display: block;
 }
@@ -140,7 +106,7 @@ a {
 
 .menu-link::before,
 .menu-link::after {
-    top: 100%;
+    top: 95%;
     width: 100%;
     height: 2px;
     left: 0;
@@ -153,13 +119,13 @@ a {
 
 .link--metis::before {
     transform-origin: 50% 50%;
-    transform: scale3d(0, 1, 1) translate3d( 0, 0, 0 );
+    transform: scale3d(0, 1, 1);
     transition: transform 0.6s ease;
 }
 
 .link--metis:hover::before {
     transform-origin: 50% 50%;
-    transform: scale3d(1, 1, 1) translate3d( 0, -3px, 0 );
+    transform: scale3d(1, 1, 1);
     transition: transform 0.3s ease;
 }
 
@@ -206,20 +172,25 @@ a {
 }
 
 .page-container {
+	transition: opacity 0.3s ease;
 	margin: 0 6%;
 	font-family: 'Montserrat';
 	opacity: 0;
 	display: none;
 }
 
-@keyframes c_link_in { from { color: #000; } to { color: #444; } }
-@keyframes c_link_out { from { color: #444; } to { color: #000; } }
-#main a { animation: c_link_out 0.3s ease; color: #000; }
-#main a:hover { animation: c_link_in 0.3s ease; color: #444; }
+#main a {
+	transition: color 0.3s ease;
+	color: #000;
+}
+#main a:hover {
+	color: #444;
+}
 
 .align-hori {
 	display: flex;
-	justify-content: space-between;
+	justify-content: center;
+	align-items: center;
 /* 	see if there's anything else */
 }
 
@@ -278,6 +249,10 @@ a {
 	position: relative;
 }
 
+#contact-form .big {
+	height: 20vh;
+}
+
 #contact-form li:focus {
 	content: '';
 }
@@ -295,8 +270,17 @@ a {
 }*/
 
 /* about style */
-#page-about {
-	margin: 1% 6% 2%;
+
+#page-about .align-hori p {
+	width: 50%;
+	margin: 0 2%;
+	font-size: 1.6em;
+}
+#page-about .align-hori .smoll {
+	font-size: 1.4em;
+}
+#page-about .align-hori {
+	margin: 2vh;
 }
 
 #about-header {
@@ -304,25 +288,92 @@ a {
 	font-size: 2em;
 }
 
-#about-content {
-	margin: 40px;
-	display: flex;
-	align-items: flex-start;
-	float: left;
-	font-size: 1.4em;
-	justify-content: center;
-	align-content: center;
-}
-
-#about-content p {
-	margin: 2vw;
-	width: 40vw;
-}
-
 #about-img {
 	display: block;
 	min-width: 400px;
 	width: 20vw;
-	height: auto;
+	min-height: calc( 0.807110438729 * 400px );
+	height: calc( 0.807110438729 * 20vw );
 	float: left;
+	flex-shrink: 0;
+}
+
+/* (dear god) carousel */
+
+.car-container {
+	overflow: visible;
+	position: relative;
+	left: 0%;
+	width: 100%;
+	max-width: 940px;
+}
+
+.car-div {
+	display: none;
+	justify-content: center;
+	align-items: center;
+	flex-flow: row;
+	width: 100%;
+	flex-wrap: wrap;
+/* 	max-height: 70vh; */
+	transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+.car-div-active {
+	opacity: 1;
+	transform: translate3d( 0, 0, 0 );
+}
+.car-div-kill {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.car-div-disappear {
+	opacity: 0;
+}
+.car-div-disappearl {
+	transform: translate3d( -40%, 0, 0 );
+}
+.car-div-disappearr {
+	transform: translate3d( 40%, 0, 0 );
+}
+.car-div-setl {
+	transition: none;
+	transform: translate3d( -40%, 0, 0 );
+}
+.car-div-setr {
+	transition: none;
+	transform: translate3d( 40%, 0, 0 );
+}
+
+.car-elm {
+	width: 240px;
+	height: 240px;
+	border-radius: 40px;
+	background-color: rgba( 40, 40, 200, 0.4 );
+	margin: 2vh 2vw;
+	flex-shrink: 0;
+}
+
+.car-butn-cont {
+	font-size: 0;
+	display: flex;
+	justify-content: center;
+	margin: 1.2vh 0;
+}
+
+.car-button {
+	flex-shrink: 0;
+    cursor: pointer;
+	border-radius: 50%;
+	width: 16px;
+	height: 16px;
+	margin: 0 8px;
+	display: inline-block;
+	background-color: #cfc;
+	transition: background-color 0.3s ease;
+}
+
+.car-active, .car-button:hover {
+	background-color: #838;
 }
