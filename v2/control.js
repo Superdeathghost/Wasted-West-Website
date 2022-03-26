@@ -23,8 +23,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	if ( gl === undefined ) console.err( "Your browser does not suppport WebGL." );
 	console.log( gl.getParameter( gl.VERSION ) );
 	
-	let cw = canvas.width / 2;
-	let ch = canvas.height / 2;
+	let cw = canvas.clientWidth / 2;
+	let ch = canvas.clientHeight / 2;
 	
 	// global mouse coord and timing variables.
 	let tPrev = 0;
@@ -46,8 +46,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		gl.TEXTURE7
 	];
 
-	// This resizes the gl viewport, sets the color to all zeros (white), and enables blending so we can use opacity in an intuitive sense.
-	gl.viewport( 0, 0, canvas.width, canvas.height );
+	// This resizes the gl viewport, sets the color to all zeros, and enables blending so we can use opacity in an intuitive sense.
+	gl.viewport( 0, 0, canvas.clientWidth, canvas.clientHeight );
 	gl.clearColor( 0.0, 0.0, 0.0, 0.0 );
 	gl.clearDepth( 1.0 );					// Clear everything
 	gl.enable( gl.BLEND );					// Enable bLENDING
@@ -107,7 +107,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		// Create texture 1
 		gl.activeTexture( gl.TEXTURE3 );
 		gl.bindTexture( gl.TEXTURE_2D, fbs.tx1 );
-		gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
+		gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, canvas.clientWidth, canvas.clientHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
 		// Linear is the best filter
 		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
 		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR );
@@ -119,7 +119,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		// Create texture 2
 		gl.activeTexture( gl.TEXTURE4 );
 		gl.bindTexture( gl.TEXTURE_2D, fbs.tx2 );
-		gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
+		gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, canvas.clientWidth, canvas.clientHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null );
 		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR );
 		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR );
 		gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE );
@@ -177,7 +177,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		this.height = image.height;
 		// Percentage of the shown image to parallax scroll
 		this.extra_scale = extra_scale;
-		this.v_mult = 0.0005 * v_mult * this.extra_scale;
+		this.v_multx = 0.0005 * v_mult * this.extra_scale;
+		this.v_multy = this.v_multx * image.height / image.width;
 		this.x = 0;
 		this.y = 0;
 	};
@@ -230,8 +231,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	Layer.prototype.update = function () {
 		gl.useProgram( this.program );
 
-		let velx = this.v_mult * ( mx - this.x / this.scale_x );
-		let vely = this.v_mult * ( my - this.y / this.scale_y );
+		let velx = this.v_multx * ( mx - this.x / this.scale_x );
+		let vely = this.v_multy * ( my - this.y / this.scale_y );
 
 		this.x += velx * tDelta;
 		this.y += vely * tDelta;
@@ -243,8 +244,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 
 	Layer.prototype.scale = function () {
 		// Scaling the image to the width of the screen.
-// 			this.scale_x = Math.min( 1, canvas.width / this.width )/2;
-// 			this.scale_y = Math.min( 1, canvas.height / this.height )/2;
+// 			this.scale_x = Math.min( 1, canvas.clientWidth / this.width )/2;
+// 			this.scale_y = Math.min( 1, canvas.clientHeight / this.height )/2;
 //
 // 			const esbl = this.extra_scale * this.scale_x;
 // 			const estr = this.extra_scale * this.scale_y;
@@ -261,8 +262,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 // 			] );
 
 		const sf = 1 + 2 * this.extra_scale;
-		const cwr = canvas.width / this.width * sf;
-		const chr = canvas.height / this.height * sf;
+		const cwr = canvas.clientWidth / this.width * sf;
+		const chr = canvas.clientHeight / this.height * sf;
 		let l_s;
 		let b_s;
 		let r_s;
@@ -270,7 +271,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 
 		if ( cwr < chr ) {
 			const new_w = this.width * chr;
-			this.scale_x = ( new_w - canvas.width ) / new_w / 2;
+			this.scale_x = ( new_w - canvas.clientWidth ) / new_w / 2;
 			this.scale_y = 1;
 			l_s = this.scale_x;
 			b_s = 0 + this.extra_scale;
@@ -279,7 +280,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		} else {
 			const new_h = this.height * cwr;
 			this.scale_x = 1;
-			this.scale_y = ( new_h - canvas.height ) / new_h / 2;
+			this.scale_y = ( new_h - canvas.clientHeight ) / new_h / 2;
 			l_s = 0 + this.extra_scale;
 			b_s = this.scale_y;
 			r_s = 1 - this.extra_scale;
@@ -324,8 +325,9 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		this.y = 0;
 	}
 
-// 	const llam = new Layer( __mid_image, 0.08, 0, -1, fbs.fb1, 1.5 );	// fbs.fb1 is on 3
-	const bkgd = new Layer( __bk_image, 0.06, 1, -1, null, 1 );
+	const fg = new Layer( __fg_image, 0.08, 0, -1, fbs.fb1, 0.9 );	// fbs.fb2 is on 4
+	const mid = new Layer( __mid_image, 0.04, 1, 3, fbs.fb2, 0.9 );	// fbs.fb1 is on 3
+	const bkgd = new Layer( __bk_image, 0.02, 2, 4, null, 0.9 );
 
 	const animate = ( tNow ) => {
 		tDelta = tNow - tPrev;
@@ -337,8 +339,10 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		gl.bindFramebuffer( gl.FRAMEBUFFER, fbs.fb2 );
 		gl.clear( gl.COLOR_BUFFER_BIT );
 
-// 		llam.update();
-// 		llam.render();
+		fg.update();
+		fg.render();
+		mid.update();
+		mid.render();
 		bkgd.update();
 		bkgd.render();
 
@@ -353,24 +357,23 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 
 	// Resize resizes the canvas and GL buffer, along with calling various functions for resizing the different components.
 	const resize = () => {
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-		cw = canvas.width / 2;
-		ch = canvas.height / 2;
+		canvas.width = canvas.clientWidth;
+		canvas.height = canvas.clientHeight;
+		cw = canvas.clientWidth / 2;
+		ch = canvas.clientHeight / 2;
 
 		gl.bindFramebuffer( gl.FRAMEBUFFER, null );
-		gl.viewport( 0, 0, canvas.width, canvas.height );
+		gl.viewport( 0, 0, canvas.clientWidth, canvas.clientHeight );
 		gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
 		// Apparently Pale Moon doesn't support CSS min, so we're doing it with JS.
-		const left_val = Math.min( window.innerWidth * 0.3, window.innerWidth * 0.5 - 360 );
-		const width_val = Math.max( window.innerWidth * 0.4, 720 );
-		document.documentElement.style.setProperty( '--home-width', width_val + "px" );
-		document.documentElement.style.setProperty( '--home-left', left_val + "px" );
+		const nav_height = document.getElementById( 'nav' ).clientHeight;
+		document.documentElement.style.setProperty( '--nav-height', nav_height + "px" );
 
 		size_fbs();
 		bkgd.scale();
-// 		llam.scale();
+		mid.scale();
+		fg.scale();
 	};
 
 	const mousemove = ( e ) => {
@@ -389,7 +392,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		cancelAnimationFrame( animFrame );
 		mouseout();
 		bkgd.reset();
-// 		llam.reset();
+		mid.reset();
+		fg.reset();
 	};
 
 	{	// Menu navigation
@@ -403,23 +407,61 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 			setTimeout( () => { canvas.style.opacity = 1; }, 200 );
 			setTimeout( () => { page.style.display = 'none'; }, 300 );
 
-			for ( let i = 0; i < page_links.length; i++ )
-				page_links[ i ].onclick = () => nav_in( pages[ i ] );
 			home.onclick = undefined;
+			for ( let i = 0; i < page_links.length; i++ )
+				page_links[ i ].onclick = () => undefined;
+
+			setTimeout( () => {
+				home.onclick = undefined;
+				for ( let i = 0; i < page_links.length; i++ )
+					page_links[ i ].onclick = () => nav_in( pages[ i ] );
+			}, 300 );
 		}
 
 		const nav_in = ( page ) => {
-			page.style.display = 'block';
+			page.style.display = '';
 			canvas.style.opacity = 0.2;
 			setTimeout( () => { page.style.opacity = 1; }, 200 );
 
-			home.onclick = () => nav_out( page );
+			home.onclick = undefined;
 			for ( let i = 0; i < page_links.length; i++ )
 				page_links[ i ].onclick = undefined;
+
+			setTimeout( () => {
+				home.onclick = () => nav_out( page );
+				for ( let i = 0; i < page_links.length; i++ )
+					page_links[ i ].onclick = () => inter_page( pages[ i ], page );
+			}, 500 );
 		};
 
-		for ( let i = 0; i < page_links.length; i++ )
+		const inter_page = ( page, p_old ) => {
+			if ( page === p_old ) return;
+			p_old.style.opacity = 0;
+			page.style.display = '';
+			page.style.position = 'absolute';
+			page.style.top = 0;
+			setTimeout( () => { p_old.style.display = 'none'; }, 300 );
+			setTimeout( () => {
+				page.style.position = '';
+				page.style.top = '';
+				page.style.opacity = 1;
+			}, 300 );
+
+			home.onclick = undefined;
+			for ( let i = 0; i < page_links.length; i++ )
+				page_links[ i ].onclick = undefined;
+
+			setTimeout( () => {
+				home.onclick = () => nav_out( page );
+				for ( let i = 0; i < page_links.length; i++ )
+					page_links[ i ].onclick = () => inter_page( pages[ i ], page );
+			}, 600 );
+		}
+
+		for ( let i = 0; i < page_links.length; i++ ) {
+			pages[ i ].style.display = 'none';
 			page_links[ i ].onclick = () => nav_in( pages[ i ] );
+		}
 	}
 
 	{	//
@@ -456,7 +498,6 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 				car_buttons[ i ].onclick = undefined;
 				setTimeout( () => { car_buttons[ i ].onclick = ( e ) => { nav_to( i ); }; }, 370 );
 			}
-
 
 			car_divs[ lnum ].classList.remove( 'car-div-active' );
 			car_divs[ lnum ].classList.add( 'car-div-kill' );
@@ -523,23 +564,30 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	// initial image loading
 	const bk_image = new Image();
 	const mid_image = new Image();
-	const fg_image = null;
+	const fg_image = new Image();
 
 	let bk_load = false;
 	let mid_load = false;
-	let fg_load = true;
+	let fg_load = false;
 	let window_load = false;
 
 	window.onload = () => { window_load = true; if ( bk_load && mid_load && fg_load ) { fn( bk_image, mid_image, fg_image ); } console.log( "window" ); };
 	bk_image.onload = () => { bk_load = true; if ( window_load && mid_load && fg_load ) { fn( bk_image, mid_image, fg_image ); } console.log( "bk" ); };
 	mid_image.onload = () => { mid_load = true; if ( bk_load && window_load && fg_load ) { fn( bk_image, mid_image, fg_image ); } console.log( "mid" ); };
-// 	fg_image.onload = () => { fg_load = true; if ( bk_load && mid_load && window_load ) fn( bk_image, mid_image, fg_image ); };
+	fg_image.onload = () => { fg_load = true; if ( bk_load && mid_load && window_load ) fn( bk_image, mid_image, fg_image ); console.log( "fg" ); };
 
 	bk_image.crossOrigin = 'anonymous';
 	mid_image.crossOrigin = 'anonymous';
-// 	fg_image.crossOrigin = 'anonymous';
+	fg_image.crossOrigin = 'anonymous';
 
-	mid_image.src = "../Assets/for_editing/derived/fg_mid.png";
-	bk_image.src = "../Assets/for_editing/ilse-orsel-5cKc2ryLj4g-unsplash.jpg";
+	let pref = "../Assets/";
+	if ( document.clientWidth <= 1920 || document.clientHeight <= 1080 )
+		pref += '1080p';
+	else
+		pref += '4k';
+
+	bk_image.src  = pref + "/pen1.png";
+	mid_image.src = pref + "/pen2.png";
+	fg_image.src = pref + "/pen3.png";
 }
 
