@@ -5,6 +5,16 @@
  * (c) Daniel Moylan 2021
  */
 
+// modified from Fabian von Ellerts, https://stackoverflow.com/questions/10787782/full-height-of-a-html-element-div-including-border-padding-and-margin
+function outerHeight ( element ) {
+    const height = element.offsetHeight,
+		  style  = window.getComputedStyle( element );
+
+    return [ 'Top', 'Bottom' ]
+        .map( side => parseInt( style[ 'margin' + side ] ) )
+        .reduce( ( total, side ) => total + side, height );
+}
+
 "use strict";
 
 // Need to execute this on the window load, so it's in a function.
@@ -244,23 +254,6 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 
 	Layer.prototype.scale = function () {
 		// Scaling the image to the width of the screen.
-// 			this.scale_x = Math.min( 1, canvas.clientWidth / this.width )/2;
-// 			this.scale_y = Math.min( 1, canvas.clientHeight / this.height )/2;
-//
-// 			const esbl = this.extra_scale * this.scale_x;
-// 			const estr = this.extra_scale * this.scale_y;
-// 			const l_s = ( 0.5 - this.scale_x ) + esbl;
-// 			const b_s = ( 0.5 - this.scale_y ) + estr;
-// 			const r_s = ( 0.5 + this.scale_x ) - esbl
-// 			const t_s = ( 0.5 + this.scale_y ) - estr;
-//
-// 			this.bk_arr = new Float32Array( [
-// 				r_s, t_s,
-// 				r_s, b_s,
-// 				l_s, t_s,
-// 				l_s, b_s,
-// 			] );
-
 		const sf = 1 + 2 * this.extra_scale;
 		const cwr = canvas.clientWidth / this.width * sf;
 		const chr = canvas.clientHeight / this.height * sf;
@@ -325,8 +318,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		this.y = 0;
 	}
 
-	const fg = new Layer( __fg_image, 0.08, 0, -1, fbs.fb1, 0.9 );	// fbs.fb2 is on 4
-	const mid = new Layer( __mid_image, 0.04, 1, 3, fbs.fb2, 0.9 );	// fbs.fb1 is on 3
+// 	const fg = new Layer( __fg_image, 0.08, 0, -1, fbs.fb1, 0.9 );	// fbs.fb2 is on 4
+// 	const mid = new Layer( __mid_image, 0.04, 1, 3, fbs.fb2, 0.9 );	// fbs.fb1 is on 3
 	const bkgd = new Layer( __bk_image, 0.02, 2, 4, null, 0.9 );
 
 	const animate = ( tNow ) => {
@@ -339,10 +332,10 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		gl.bindFramebuffer( gl.FRAMEBUFFER, fbs.fb2 );
 		gl.clear( gl.COLOR_BUFFER_BIT );
 
-		fg.update();
-		fg.render();
-		mid.update();
-		mid.render();
+// 		fg.update();
+// 		fg.render();
+// 		mid.update();
+// 		mid.render();
 		bkgd.update();
 		bkgd.render();
 
@@ -354,6 +347,14 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	/*
 	 * Events
 	 */
+
+	let active_page = undefined;
+	const fix_footer = ( nav_h ) => {
+		const footer = document.getElementById( 'footer' );
+		const base_h = canvas.clientHeight - footer.clientHeight;
+		const ap_h = active_page !== undefined ? ( nav_h + outerHeight( active_page ) ) : 0;
+		footer.style.top = ( Math.max( base_h, ap_h ) ) + 'px';
+	};
 
 	// Resize resizes the canvas and GL buffer, along with calling various functions for resizing the different components.
 	const resize = () => {
@@ -370,10 +371,43 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		const nav_height = document.getElementById( 'nav' ).clientHeight;
 		document.documentElement.style.setProperty( '--nav-height', nav_height + "px" );
 
+		// Fixing links that are being stupid.
+// 		const io_links = document.getElementsByClassName( 'link--io' );
+// 		io_links.
+
+		// resizing car container with right aspect ratio
+		const cc = document.getElementsByClassName( 'car-container' )[ 0 ];
+		// if resize is
+		if ( canvas.clientWidth > 1024 ) {
+			const ccheight = Math.max( 0.9*(canvas.clientHeight - nav_height - 48), 600 );
+			const ccwidth = Math.max( 0.7 * canvas.clientWidth, 900 );
+			if ( ccwidth < 3/2 * ccheight ) {
+				cc.style.width = ccwidth + 'px';
+				cc.style.height = (2/3 * ccwidth) + 'px';
+				cc.style.fontSize = (ccwidth / 3 / 14) + 'px';
+			} else {
+				cc.style.width = (3/2 * ccheight) + 'px';
+				cc.style.height = ccheight + 'px';
+				cc.style.fontSize = (ccheight / 2 / 14) + 'px';
+			}
+		} else if ( canvas.clientWidth > 660 ) {
+			const ccwidth = Math.max( 0.7 * canvas.clientWidth, 600 );
+			cc.style.width = ccwidth + 'px';
+			cc.style.height = (3/2 * ccwidth) + 'px';
+			cc.style.fontSize = (ccwidth / 2 / 14) + 'px';
+		} else {
+			const ccwidth = Math.min( 0.95*canvas.clientWidth, Math.max( 0.7 * canvas.clientWidth, 300 ) );
+			cc.style.width = ccwidth + 'px';
+			cc.style.height = (6 * ccwidth) + 'px';
+			cc.style.fontSize = (ccwidth / 1 / 14) + 'px';
+		}
+
+		fix_footer( nav_height );
+
 		size_fbs();
 		bkgd.scale();
-		mid.scale();
-		fg.scale();
+// 		mid.scale();
+// 		fg.scale();
 	};
 
 	const mousemove = ( e ) => {
@@ -392,17 +426,29 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		cancelAnimationFrame( animFrame );
 		mouseout();
 		bkgd.reset();
-		mid.reset();
-		fg.reset();
+// 		mid.reset();
+// 		fg.reset();
 	};
 
 	{	// Menu navigation
+		const nav = document.getElementById( 'nav' );
 		const page_links = document.getElementsByClassName( "menu-link" );
 		const pages = document.getElementsByClassName( "page-container" );
 		const home = document.getElementById( "link-home" );
 		const e_fn = ( e ) => {  };
 
 		const nav_out = ( page ) => {
+			console.log( page );
+			console.log( page_links[ 3 ].onclick );
+			if ( page.id === 'page-cast' && page_links[ 3 ].onclick !== undefined && page_links[ 3 ].onclick !== null ) {
+				const scope = page_links[ 3 ].onclick.bind( page_links[ 3 ] );
+				console.log( scope );
+				setTimeout( () => scope(), 220 );
+			}
+
+			active_page = undefined;
+			setTimeout( () => { fix_footer( nav.clientHeight ); }, 20 );
+
 			page.style.opacity = 0;
 			setTimeout( () => { canvas.style.opacity = 1; }, 200 );
 			setTimeout( () => { page.style.display = 'none'; }, 300 );
@@ -419,6 +465,9 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		}
 
 		const nav_in = ( page ) => {
+			active_page = page;
+			setTimeout( () => { fix_footer( nav.clientHeight ); }, 20 );
+
 			page.style.display = '';
 			canvas.style.opacity = 0.2;
 			setTimeout( () => { page.style.opacity = 1; }, 200 );
@@ -436,6 +485,18 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 
 		const inter_page = ( page, p_old ) => {
 			if ( page === p_old ) return;
+
+			console.log( p_old );
+			console.log( page_links[ 3 ].onclick );
+			if ( p_old.id === 'page-cast' && page_links[ 3 ].onclick !== undefined && page_links[ 3 ].onclick !== null ) {
+				const scope = page_links[ 3 ].onclick.bind( page_links[ 3 ] );
+				console.log( scope );
+				setTimeout( () => scope(), 220 );
+			}
+
+			active_page = page;
+			setTimeout( () => { fix_footer( nav.clientHeight ); }, 20 );
+
 			p_old.style.opacity = 0;
 			page.style.display = '';
 			page.style.position = 'absolute';
@@ -464,7 +525,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		}
 	}
 
-	{	//
+	{	// contact focus script
 		const contact_inputs = document.getElementsByClassName( "input" );
 		for ( let i = 0; i < contact_inputs.length; i++ ) {
 			let _input = contact_inputs[ i ].children[ 0 ];
@@ -506,12 +567,12 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 				const ld = car_divs[ lnum ];
 				return ( () => { ld.style.display = 'none'; } );
 			};
-			setTimeout( scope_bubble(), 300 );
+			setTimeout( scope_bubble(), 290 );
 
 			car_divs[ num ].classList.remove( 'car-div-kill' );
 			car_divs[ num ].classList.remove( 'car-div-disappearr' );
 			car_divs[ num ].classList.remove( 'car-div-disappearl' );
-			car_divs[ num ].style.display = 'flex';
+			car_divs[ num ].style.display = 'grid';
 
 			if ( num > lnum ) {
 				car_divs[ lnum ].classList.add( 'car-div-disappearl' );
@@ -536,12 +597,132 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		for ( let i = 0; i < car_buttons.length; i++ ) {
 			if ( i > 0 ) {
 				car_divs[ i ].classList.add( 'car-div-disappear' );
+				car_divs[ i ].classList.add( 'car-div-kill' );
 				car_divs[ i ].style.display = 'none';
 			} else {
-				car_divs[ i ].style.display = 'flex';
+				car_divs[ i ].style.display = 'grid';
 			}
 			car_buttons[ i ].onclick = ( e ) => { nav_to( i ); };
 		}
+	}
+
+	{	// fade from carousel to cast member page
+		const page = document.getElementById( "page-cast" );
+		const cast_lin = document.getElementById( "link-cast" );
+		const carousel = document.getElementsByClassName( "car-master" )[ 0 ];
+		const car_elms = document.getElementsByClassName( "car-elm" );
+		const bio_disp = document.getElementsByClassName( "bio-master" )[ 0 ];
+		const bio_elms = document.getElementsByClassName( "bio-elm" );
+
+		const nav_to = ( num ) => {
+			for ( let i = 0; i < car_elms.length; i++ )
+				car_elms[ i ].onclick = undefined;
+			cast_lin.onclick = () => {nav_from( num )};
+
+			bio_elms[ num ].style.display = '';
+			bio_disp.style.display = '';
+			bio_disp.style.position = 'absolute';
+
+			carousel.style.opacity = '0';
+
+			setTimeout( () => {
+				carousel.style.display = 'none';
+				bio_disp.style.opacity = '1';
+				bio_disp.style.position = '';
+			}, 300 );
+		}
+
+		const nav_from = ( num ) => {
+			setTimeout( () => {
+				for ( let i = 0; i < car_elms.length; i++ )
+					car_elms[ i ].onclick = () => {nav_to( i );};
+			}, 300 );
+
+			cast_lin.onclick = undefined;
+			carousel.style.display = '';
+			carousel.style.position = 'absolute';
+
+			bio_disp.style.opacity = '0';
+
+			setTimeout( () => {
+				carousel.style.position = '';
+				carousel.style.opacity = '1';
+				bio_disp.style.display = 'none';
+				bio_elms[ num ].style.display = 'none';
+			}, 300 );
+		}
+
+		for ( let i = 0; i < bio_elms.length; i++ )
+			bio_elms[ i ].style.display = 'none';
+		for ( let i = 0; i < car_elms.length; i++ )
+			car_elms[ i ].onclick = () => {nav_to( i );};
+		bio_disp.style.display = 'none';
+		bio_disp.style.opacity = '0';
+	}
+
+	{
+		const left_but = document.getElementById( "audio-cont-l" );
+		const right_but = document.getElementById( "audio-cont-r" );
+		const audio_elms = document.getElementsByClassName( "audio-control" );
+		let cur_elm = 0;
+
+		const nav = ( l_or_r ) => {
+			console.log( 'nav: '+l_or_r );
+
+			left_but.onclick = undefined; right_but.onclick = undefined;
+			setTimeout( () => {
+				left_but.onclick = ( e ) => { nav( -1 ); };
+				right_but.onclick = ( e ) => { nav( 1 ); };
+			}, 240 );
+
+			let new_elm = cur_elm + l_or_r;
+			new_elm = new_elm < 0 ? 0 : (new_elm >= audio_elms.length ? audio_elms.length-1 : new_elm);
+			console.log( 'cur: '+cur_elm+', new: '+new_elm );
+			if ( new_elm === cur_elm ) return;
+
+			audio_elms[ cur_elm ].classList.remove( 'car-div-active' );
+			audio_elms[ cur_elm ].classList.add( 'car-div-kill' );
+			audio_elms[ cur_elm ].classList.add( 'car-div-disappear' );
+			let scope_bubble = () => {
+				const ld = audio_elms[ cur_elm ];
+				return ( () => { ld.style.display = 'none'; } );
+			};
+			setTimeout( scope_bubble(), 190 );
+
+			audio_elms[ new_elm ].classList.remove( 'car-div-kill' );
+			audio_elms[ new_elm ].classList.remove( 'car-div-disappearr' );
+			audio_elms[ new_elm ].classList.remove( 'car-div-disappearl' );
+			audio_elms[ new_elm ].style.display = '';
+
+			if ( l_or_r > 0 ) {
+				audio_elms[ cur_elm ].classList.add( 'car-div-disappearl' );
+				audio_elms[ new_elm ].classList.add( 'car-div-setr' );
+			} else {
+				audio_elms[ cur_elm ].classList.add( 'car-div-disappearr' );
+				audio_elms[ new_elm ].classList.add( 'car-div-setl' );
+			}
+
+			setTimeout( () => {
+				audio_elms[ new_elm ].classList.remove( 'car-div-setr' );
+				audio_elms[ new_elm ].classList.remove( 'car-div-setl' );
+				audio_elms[ new_elm ].classList.remove( 'car-div-disappear' );
+				audio_elms[ new_elm ].classList.add( 'car-div-active' );
+			}, 20 );
+
+			cur_elm = new_elm;
+		};
+
+		for ( let i = 0; i < audio_elms.length; i++ ) {
+			if ( i > 0 ) {
+				audio_elms[ i ].classList.add( 'car-div-disappear' );
+				audio_elms[ i ].classList.add( 'car-div-kill' );
+				audio_elms[ i ].style.display = 'none';
+			} else {
+				audio_elms[ i ].style.display = '';
+			}
+		}
+		left_but.onclick = ( e ) => { nav( -1 ); };
+		right_but.onclick = ( e ) => { nav( 1 ); };
 	}
 
 	resize();
@@ -567,8 +748,10 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	const fg_image = new Image();
 
 	let bk_load = false;
-	let mid_load = false;
-	let fg_load = false;
+// 	let mid_load = false;
+// 	let fg_load = false;
+	let mid_load = true;
+	let fg_load = true;
 	let window_load = false;
 
 	window.onload = () => { window_load = true; if ( bk_load && mid_load && fg_load ) { fn( bk_image, mid_image, fg_image ); } console.log( "window" ); };
@@ -577,17 +760,21 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	fg_image.onload = () => { fg_load = true; if ( bk_load && mid_load && window_load ) fn( bk_image, mid_image, fg_image ); console.log( "fg" ); };
 
 	bk_image.crossOrigin = 'anonymous';
-	mid_image.crossOrigin = 'anonymous';
-	fg_image.crossOrigin = 'anonymous';
+// 	mid_image.crossOrigin = 'anonymous';
+// 	fg_image.crossOrigin = 'anonymous';
 
 	let pref = "../Assets/";
-	if ( document.clientWidth <= 1920 || document.clientHeight <= 1080 )
-		pref += '1080p';
-	else
-		pref += '4k';
+// 	if ( document.clientWidth <= 1920 || document.clientHeight <= 1080 )
+// 		pref += '1080p';
+// 	else
+// 		pref += '4k';
 
-	bk_image.src  = pref + "/pen1.png";
-	mid_image.src = pref + "/pen2.png";
-	fg_image.src = pref + "/pen3.png";
+	bk_image.src  = pref + "test/bkgd-new.jpg";
+// 	mid_image.src = pref + "/pen2.png";
+// 	fg_image.src = pref + "/pen3.png";
+
+	// load all images responsively
+
+// 	for ( let i =
 }
 
