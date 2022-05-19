@@ -1,0 +1,25 @@
+.aud-bar {
+	position: relative;
+	width: 400px;
+	height: 4px;
+	padding-top:2px;
+	padding-bottom:2px;
+	background-color: black;
+}
+
+.aud-indic {
+	position: absolute;
+	border-radius: 6px;
+	width: 12px;
+	height: 12px;
+	top: -4px;
+	left: -6px;
+	margin: 0;
+	background-color: red;
+}
+
+.aud-vol .aud-indic { left: 394px; }
+
+.aud-play {
+	display:none;
+}

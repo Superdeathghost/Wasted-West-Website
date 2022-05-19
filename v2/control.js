@@ -15,6 +15,45 @@ function outerHeight ( element ) {
         .reduce( ( total, side ) => total + side, height );
 }
 
+const touchy = new ( function () {
+	let cur_touch = undefined;
+	this.mt_ev_start = ( elm, cb ) => {
+		elm.onmousedown = cb;
+		elm.ontouchstart = ( e ) => {
+			e.preventDefault();
+			if ( cur_touch === undefined )
+				cur_touch = e.changedTouches[ 0 ];
+			else
+				cb( e );
+		};
+	};
+	this.mt_ev_move = ( elm, cb ) => {
+		elm.onmousemove = cb;
+		elm.ontouchmove = ( e ) => {
+			e.preventDefault();
+			if ( cur_touch !== undefined )
+				cb( e );
+		};
+	};
+	const lev_end_fn = ( e ) => {
+		e.preventDefault();
+		if ( cur_touch !== undefined ) {
+			cb( e );
+			cur_touch = undefined;
+		}
+	};
+	this.mt_ev_end = ( elm, cb ) => {
+		elm.onmouseup = cb;
+		elm.ontouchend = lev_end_fn( e );
+	};
+	this.mt_ev_leave = ( elm, cb ) => {
+		elm.onmouseleave = cb;
+		elm.ontouchcancel = lev_end_fn( e );
+	};
+} )();
+
+Math.clamp = Math.clamp !== undefined ? Math.clamp : ( x, y, z ) => Math.max( Math.min( x, z ), y );
+
 "use strict";
 
 // Need to execute this on the window load, so it's in a function.
@@ -372,15 +411,20 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		document.documentElement.style.setProperty( '--nav-height', nav_height + "px" );
 
 		// Fixing links that are being stupid.
-// 		const io_links = document.getElementsByClassName( 'link--io' );
-// 		io_links.
+		const io_links = document.getElementsByClassName( 'link--io' );
+		if ( canvas.clientWidth > /*???*/ 0 ) {
+// 			io_links.
+		} else {
+
+		}
 
 		// resizing car container with right aspect ratio
 		const cc = document.getElementsByClassName( 'car-container' )[ 0 ];
-		// if resize is
+
+		// Look I'm not proud of this but it works :/.
 		if ( canvas.clientWidth > 1024 ) {
-			const ccheight = Math.max( 0.9*(canvas.clientHeight - nav_height - 48), 600 );
-			const ccwidth = Math.max( 0.7 * canvas.clientWidth, 900 );
+			const ccheight = Math.max( 0.68 * (canvas.clientHeight - nav_height - 48), 568 );
+			const ccwidth = Math.max( 0.7 * canvas.clientWidth, 960 );
 			if ( ccwidth < 3/2 * ccheight ) {
 				cc.style.width = ccwidth + 'px';
 				cc.style.height = (2/3 * ccwidth) + 'px';
@@ -400,6 +444,39 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 			cc.style.width = ccwidth + 'px';
 			cc.style.height = (6 * ccwidth) + 'px';
 			cc.style.fontSize = (ccwidth / 1 / 14) + 'px';
+		}
+
+		const audio_cont = document.getElementById( 'audio-cont' );
+		if ( audio_cont.style.height != '' ) {
+			audio_cont.style.minWidth = '';
+			audio_cont.style.height = '';
+			Array.from( document.getElementsByClassName( 'audio-elms' ) ).forEach( ( e ) => {
+				e.style.minWidth = ''; } );
+			Array.from( document.getElementsByClassName( 'audio-control' ) ).forEach( ( e ) => {
+				e.style.minWidth = ''; e.style.height = ''; } );
+		}
+
+		if ( canvas.clientWidth < 360 ) {
+			const s1 = canvas.clientWidth + 'px';
+			const s2 = ( 0.9 * canvas.clientWidth ) + 'px';
+			const s3 = ( 320 * 320 / 0.9 / canvas.clientWidth ) + 'px';
+			update_aud_disp( 1 );
+			audio_cont.style.minWidth = canvas.clientWidth + 'px';
+			audio_cont.style.height = s3;
+			Array.from( document.getElementsByClassName( 'audio-elms' ) ).forEach( ( e ) => {
+				e.style.minWidth = s1; } );
+			Array.from( document.getElementsByClassName( 'audio-control' ) ).forEach( ( e ) => {
+				e.style.minWidth = s2; e.style.height = s3; } );
+			ad_c_set_flag = 0;
+		} else if ( canvas.clientWidth < 740 ) {
+			update_aud_disp( 1 );
+			audio_cont.style.minWidth = 1.1*320 + 'px';
+		} else if ( canvas.clientWidth < 1100 ) {
+			update_aud_disp( 2 );
+			audio_cont.style.minWidth = 2.2*320 + 'px';
+		} else {
+			update_aud_disp( 3 );
+			audio_cont.style.minWidth = 3.3*320 + 'px';
 		}
 
 		fix_footer( nav_height );
@@ -660,69 +737,168 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		bio_disp.style.opacity = '0';
 	}
 
+	// how many elms to display at one time
+	let update_aud_disp = undefined;
 	{
 		const left_but = document.getElementById( "audio-cont-l" );
 		const right_but = document.getElementById( "audio-cont-r" );
-		const audio_elms = document.getElementsByClassName( "audio-control" );
+		const audio_elms = document.getElementsByClassName( "audio-elms" );
 		let cur_elm = 0;
+		let aud_disp_elms = 0;
 
 		const nav = ( l_or_r ) => {
-			console.log( 'nav: '+l_or_r );
-
 			left_but.onclick = undefined; right_but.onclick = undefined;
 			setTimeout( () => {
 				left_but.onclick = ( e ) => { nav( -1 ); };
 				right_but.onclick = ( e ) => { nav( 1 ); };
 			}, 240 );
 
-			let new_elm = cur_elm + l_or_r;
-			new_elm = new_elm < 0 ? 0 : (new_elm >= audio_elms.length ? audio_elms.length-1 : new_elm);
-			console.log( 'cur: '+cur_elm+', new: '+new_elm );
-			if ( new_elm === cur_elm ) return;
+			const new_elm = cur_elm + l_or_r;
+			if ( new_elm > audio_elms.length - aud_disp_elms || new_elm < 0 ) return;
 
-			audio_elms[ cur_elm ].classList.remove( 'car-div-active' );
-			audio_elms[ cur_elm ].classList.add( 'car-div-kill' );
-			audio_elms[ cur_elm ].classList.add( 'car-div-disappear' );
+			const o_elm = l_or_r === 1 ? cur_elm : cur_elm + aud_disp_elms - 1;
+			const n_elm = l_or_r === 1 ? cur_elm + aud_disp_elms : new_elm;
+
+			// shift all elms to the left or right (except the new one)
+			for ( let i = 0; i < n_elm; i++ )
+				audio_elms[ i ].style.left = ( ( i - new_elm ) * 100 / aud_disp_elms ) + '%';
+			for ( let i = n_elm + 1; i < audio_elms.length; i++ )
+				audio_elms[ i ].style.left = ( ( i - new_elm ) * 100 / aud_disp_elms ) + '%';
+
+			// display the new one
+			audio_elms[ n_elm ].style.display = '';
+
+			// fade out old elm
+			audio_elms[ o_elm ].style.opacity = 0;
 			let scope_bubble = () => {
-				const ld = audio_elms[ cur_elm ];
+				const ld = audio_elms[ o_elm ];
 				return ( () => { ld.style.display = 'none'; } );
 			};
 			setTimeout( scope_bubble(), 190 );
 
-			audio_elms[ new_elm ].classList.remove( 'car-div-kill' );
-			audio_elms[ new_elm ].classList.remove( 'car-div-disappearr' );
-			audio_elms[ new_elm ].classList.remove( 'car-div-disappearl' );
-			audio_elms[ new_elm ].style.display = '';
-
-			if ( l_or_r > 0 ) {
-				audio_elms[ cur_elm ].classList.add( 'car-div-disappearl' );
-				audio_elms[ new_elm ].classList.add( 'car-div-setr' );
-			} else {
-				audio_elms[ cur_elm ].classList.add( 'car-div-disappearr' );
-				audio_elms[ new_elm ].classList.add( 'car-div-setl' );
-			}
-
+			// after new one is displayed, set it's properties so the animations play correctly.
 			setTimeout( () => {
-				audio_elms[ new_elm ].classList.remove( 'car-div-setr' );
-				audio_elms[ new_elm ].classList.remove( 'car-div-setl' );
-				audio_elms[ new_elm ].classList.remove( 'car-div-disappear' );
-				audio_elms[ new_elm ].classList.add( 'car-div-active' );
-			}, 20 );
+				audio_elms[ n_elm ].style.opacity = 1;
+				audio_elms[ n_elm ].style.left = ( ( n_elm - new_elm ) * 100 / aud_disp_elms ) + '%';
+			}, 1 );
 
 			cur_elm = new_elm;
 		};
 
-		for ( let i = 0; i < audio_elms.length; i++ ) {
-			if ( i > 0 ) {
-				audio_elms[ i ].classList.add( 'car-div-disappear' );
-				audio_elms[ i ].classList.add( 'car-div-kill' );
-				audio_elms[ i ].style.display = 'none';
-			} else {
-				audio_elms[ i ].style.display = '';
+		update_aud_disp = ( elms_disp ) => {
+			aud_disp_elms = elms_disp;
+			for ( let i = 0; i < audio_elms.length; i++ ) {
+				if ( i > cur_elm + aud_disp_elms - 1 ) {
+					audio_elms[ i ].style.opacity = 0;
+					audio_elms[ i ].style.display = 'none';
+				} else {
+					audio_elms[ i ].style.opacity = 1;
+					audio_elms[ i ].style.display = '';
+				}
+				audio_elms[ i ].style.left = ( ( i - cur_elm ) * 100 / aud_disp_elms ) + '%';
 			}
-		}
+		};
+
+		update_aud_disp( 3 );
 		left_but.onclick = ( e ) => { nav( -1 ); };
 		right_but.onclick = ( e ) => { nav( 1 ); };
+	}
+
+	{
+		const players = document.getElementsByClassName( "audio-control" );
+		const srcs = document.querySelectorAll( 'audio' );
+		const pps = document.getElementsByClassName( "aud-pp" );
+		const pauses = document.getElementsByClassName( "aud-pause" );
+		const plays = document.getElementsByClassName( "aud-play" );
+		// position and volume bars
+		const bpos = document.getElementsByClassName( "aud-pos" );
+		const bvol = document.getElementsByClassName( "aud-vol" );
+		// position and volume sliders
+		const spos = Array.from( bpos ).map( e => e.children[ 0 ] );
+		const svol = Array.from( bvol ).map( e => e.children[ 0 ] );
+
+		const initfn = ( arr ) => Array.from( arr ).map( e => {
+			let rect = e.getBoundingClientRect();
+			return rect.left + window.scrollX;
+		} );
+		const page_listen = document.getElementById( 'page-listen' );
+		let bpscroll = undefined;
+		let bvscroll = undefined;
+
+		for ( i in bpscroll ) console.log( "bpscroll: " + bpscroll[ i ] );
+
+		const slider_offset = 0;
+
+		const update_time = ( i ) =>
+			spos[ i ].style.left = Math.clamp( srcs[ i ].currentTime * bpos[ i ].clientWidth /
+											   srcs[ i ].duration, -slider_offset,
+											   bpos[ i ].clientWidth - slider_offset ) + 'px';
+
+		const drag_slider_time = ( e, i ) => {
+			const slen = Math.clamp( e.clientX - bpscroll[ i ] - slider_offset, -slider_offset, bpscroll[ i ] - slider_offset );
+			slider_stub( spos[ i ], bpos[ i ], slen, i );
+			players[ i ].onmousemove = ( e ) => drag_slider_time( e, i );
+		};
+		const drag_slider_vol = ( e, i ) => {
+			const slen = Math.clamp( e.clientX - bvscroll[ i ] - slider_offset, -slider_offset, bvscroll[ i ] - slider_offset );
+			srcs[ i ].volume = ( slen / bvol[ i ].clientWidth );
+			slider_stub( svol[ i ], bvol[ i ], slen, i );
+			players[ i ].onmousemove = ( e ) => drag_slider_vol( e, i );
+		};
+		const slider_stub = ( slider, bar, slen, i ) => {
+			slider.style.left = slen + 'px';
+			players[ i ].onmouseleave = () => drag_cancel( i );
+			players[ i ].onmouseup = () => drag_cancel( i );
+		};
+
+		const pp = ( i ) => {
+			if ( srcs[ i ].paused ) {
+				pauses[ i ].style.display = 'none';
+				plays[ i ].style.display = 'block';
+				srcs[ i ].play();
+			} else {
+				pauses[ i ].style.display = 'block';
+				plays[ i ].style.display = 'none';
+				srcs[ i ].pause();
+			}
+		};
+
+		const pb_ended = ( i ) => {
+			const chs = pps[ i ].children;
+			pauses[ i ].style.display = 'block';
+			plays[ i ].style.display = 'none';
+		};
+
+		const drag_cancel = ( i ) => {
+			players[ i ].onmousemove = undefined;
+			players[ i ].onmouseleave = undefined;
+			players[ i ].onmouseup = undefined;
+		};
+
+		for ( let i = 0; i < players.length; i++ ) {
+			const perm_i = i;
+			bpos[ i ].onmousedown = ( e ) => drag_slider_time( e, i );
+			bvol[ i ].onmousedown = ( e ) => drag_slider_vol( e, i );
+			spos[ i ].onmousedown = ( e ) => drag_slider_time( e, i );
+			svol[ i ].onmousedown = ( e ) => drag_slider_vol( e, i );
+			svol[ i ].style.left = 100 + '%';
+			pps[ i ].onclick = () => pp( i );
+			srcs[ i ].ontimeupdate = () => update_time( i );
+			srcs[ i ].onended = () => pb_ended( i );
+			plays[ i ].style.display = 'none';
+
+			new IntersectionObserver( ( ent, obs ) => {
+				for ( j in ent ) {
+					if ( ent[ j ].intersectionRatio > 0 ) {
+						srcs[ j ].load();
+						bpscroll = initfn( bpos );
+						bvscroll = initfn( bvol );
+						obs.disconnect();
+						break;
+					}
+				}
+			} ).observe( players[ i ] );
+		}
 	}
 
 	resize();
@@ -763,18 +939,36 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 // 	mid_image.crossOrigin = 'anonymous';
 // 	fg_image.crossOrigin = 'anonymous';
 
-	let pref = "../Assets/";
-// 	if ( document.clientWidth <= 1920 || document.clientHeight <= 1080 )
-// 		pref += '1080p';
-// 	else
-// 		pref += '4k';
-
-	bk_image.src  = pref + "test/bkgd-new.jpg";
-// 	mid_image.src = pref + "/pen2.png";
-// 	fg_image.src = pref + "/pen3.png";
-
 	// load all images responsively
 
-// 	for ( let i =
+	let pref = "../Assets/bkgd";
+	let suff = undefined;
+	const s_width = window.screen.width * window.devicePixelRatio;
+	const s_height = window.screen.height * window.devicePixelRatio;
+	if ( s_width > s_height ) {
+		if ( s_width < 720 )
+			suff = "vert720p";
+		else if ( s_width < 900 )
+			suff = "vert900p";
+		else if ( s_width < 1080 )
+			suff = "vert1080p";
+		else
+			suff = "vert1440p";
+	} else {
+		if ( s_height < 720 )
+			suff = "720p";
+		else if ( s_height < 900 )
+			suff = "900p";
+		else if ( s_height < 1080 )
+			suff = "1080p";
+		else if ( s_height < 1440 )
+			suff = "1440p";
+		else
+			suff = "4k";
+	}
+
+	bk_image.src  = pref + "bkgd" + suff + ".jpg";
+// 	mid_image.src = pref + "/pen2.png";
+// 	fg_image.src = pref + "/pen3.png";
 }
 
