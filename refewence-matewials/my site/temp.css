@@ -1,0 +1,83 @@
+
+@keyframes fade_in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes fade_out {
+	from { opacity: 1; }
+	to { opacity: 0; }
+}
+
+.fade-in {
+	animation-name: fade_in;
+	animation-duration: 0.3s;
+	animation-timing-function: ease;
+}
+
+.fade-out {
+	animation-name: fade_out;
+	animation-duration: 0.3s;
+	animation-timing-function: ease;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+}
+
+body {
+	background-color: #000;
+}
+
+.gl_image {
+	display:none;
+}
+
+#content {
+	position: relative;
+	display: block;
+/* 	Initial fade in */
+	animation-name: fade_in;
+	animation-duration: 1s;
+	animation-timing-function: ease;
+}
+
+#content > canvas {
+	position: relative;
+	display: block;
+}
+
+#content > div {
+	position: absolute;
+	display: block;
+}
+
+#over-canvas {
+	overflow: visible;
+	top: 0;
+	left: 0;
+	z-index: 10;
+}
+
+#back-arrow {
+	position: relative;
+	top: 1vmin;
+	left: 1vmin;
+	width: 10vmin;
+	height: 10vmin;
+	opacity: .7;
+/* 	Arrow will start off not displaying since nothing's selected.*/
+	display: none;
+}
+
+.circle-text {
+	position: absolute;
+	display: block;
+	text-align: center;
+	font-size: 4vmin;
+	font-family: 'Montserrat', sans-serif;
+	pointer-events: none;
+}
