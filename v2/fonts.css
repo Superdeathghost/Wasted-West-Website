@@ -1,0 +1,18 @@
+
+/* submenu */
+@import url( 'https://fonts.googleapis.com/css2?family=Alata&display=swap' );
+/* text */
+@import url( 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap' );
+/* former title */
+@import url( 'https://fonts.googleapis.com/css2?family=Oleo+Script&display=swap' );
+
+@import url( 'https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap' );
+
+@import url( 'https://fonts.googleapis.com/css2?family=Syne+Tactile&display=swap' );
+
+@import url( 'https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@300&display=swap' );
+
+@font-face {
+	font-family: tit-font;
+    src: url("Assets/fonts/gomarice_nandaka_western.ttf");
+}

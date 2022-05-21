@@ -1,0 +1,78 @@
+@use 'sass:math'
+// Fns
+
+// Strip value of unit
+@function strip ( $val )
+    @return math.div( $val, ($val * 0 + 1) )
+// em -> vw when screen is 1280 px long
+@function em_vw ( $val )
+    @return math.div( strip($val), 1280 )*100 + 0vw
+
+// Basic Stuff
+*
+    margin: 0
+    padding: 0
+    display: block
+    text-decoration: none
+    outline: none
+html, body
+    font-size: 16px
+    height: 100%
+    width: 100%
+body
+    background-image: linear-gradient(to bottom, yellow, burlywood)
+title
+    display: none
+
+// Nav
+
+$nvm: 0.6*16px         // Nav Vertical Margin
+$nhm: 0.8*16px         // Nav Horizontal Margin
+$nthm: 1.2*16px        // Nav Title Horizontal Margin
+$nfs: 2.6*16px         // Nav Font Size
+$tit-off: 1px          // This just makes it look more 'right'
+
+
+// Static Stuff
+#nav
+    display: flex
+    background-color: #DDA
+    position: relative
+    width: 100%
+    height: 20%
+    *
+        display: flex
+        align-items: center
+        font-family: 'Montserrat', sans-serif
+    li
+        float: left
+    a
+        color: #666
+    #title-link
+        color: #333
+        font-family: 'Oleo Script', cursive
+
+// Responsive Stuff
+@media (min-width: 1280px)
+    #nav
+        li
+            margin: $nvm $nhm
+            font-size: $nfs
+        #title-li
+            margin: calc($nvm + $tit-off) $nthm calc($nvm - $tit-off) ($nthm + $nhm)
+
+@media (max-width: 1280px) and (min-width: 400px)
+    #nav
+        li
+            margin: $nvm em_vw($nhm)
+            font-size: em_vw($nfs)
+        #title-li
+            margin: calc($nvm + $tit-off) em_vw($nthm) calc($nvm + $tit-off) em_vw($nthm + $nhm)
+
+@media (max-width: 400px)
+    #nav
+        li
+            margin: 0.15em
+            font-size: 1.4em
+        #title-li
+            margin: 0.4em 1.6em 0.4em 1.45em
