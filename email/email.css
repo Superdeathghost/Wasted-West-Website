@@ -1,0 +1,16 @@
+#screen {
+	opacity: 0.2;
+}
+
+.page-container {
+	opacity:1;
+}
+
+.main-p {
+	font-size: 1.6em;
+	line-height: 1.8em;
+}
+
+ul {
+	margin-left: 2em;
+}
