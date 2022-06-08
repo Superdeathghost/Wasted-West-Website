@@ -1,9 +1,10 @@
-
 /*
  * Landing graphical interface / control script.
  *
- * (c) Daniel Moylan 2021
+ * (c) Daniel Moylan 2022
  */
+
+"use strict";
 
 // modified from Fabian von Ellerts, https://stackoverflow.com/questions/10787782/full-height-of-a-html-element-div-including-border-padding-and-margin
 function outerHeight ( element ) {
@@ -15,66 +16,132 @@ function outerHeight ( element ) {
         .reduce( ( total, side ) => total + side, height );
 }
 
+const is_undef = ( c ) => c === undefined || c === null;
+
 const touchy = new ( function () {
 	let cur_touch = undefined;
 	this.mt_ev_start = ( elm, cb ) => {
 		elm.onmousedown = cb;
-		elm.ontouchstart = ( e ) => {
-			e.preventDefault();
-			if ( cur_touch === undefined )
+		elm.ontouchstart = !is_undef( cb ) ? ( ( e ) => {
+			// console.log( 'ontouchstart called' );
+// 			e.preventDefault();
+			if ( is_undef( cur_touch ) ) {
 				cur_touch = e.changedTouches[ 0 ];
-			else
-				cb( e );
-		};
+				cb( cur_touch );
+			}
+		} ) : cb;
 	};
 	this.mt_ev_move = ( elm, cb ) => {
 		elm.onmousemove = cb;
-		elm.ontouchmove = ( e ) => {
-			e.preventDefault();
-			if ( cur_touch !== undefined )
-				cb( e );
-		};
+		elm.ontouchmove = !is_undef( cb ) ? ( ( e ) => {
+			// console.log( 'ontouchmove called' );
+// 			e.preventDefault();
+			if ( !is_undef( cur_touch ) && cur_touch.identifier === e.changedTouches[ 0 ].identifier ) {
+				cur_touch = e.changedTouches[ 0 ];
+				cb( cur_touch );
+			}
+		} ) : cb;
 	};
-	const lev_end_fn = ( e ) => {
-		e.preventDefault();
-		if ( cur_touch !== undefined ) {
-			cb( e );
-			cur_touch = undefined;
-		}
+	const lev_end_fn = ( cb ) => {
+		return ( !is_undef( cb ) ? ( ( e ) => {
+			if ( !is_undef( cur_touch ) && cur_touch.identifier === e.changedTouches[ 0 ].identifier ) {
+				cb( cur_touch );
+				cur_touch = undefined;
+			}
+			// console.log( 'ontouchleave/end called' );
+		} ) : cb );
 	};
 	this.mt_ev_end = ( elm, cb ) => {
 		elm.onmouseup = cb;
-		elm.ontouchend = lev_end_fn( e );
+		elm.ontouchend = lev_end_fn( cb );
 	};
 	this.mt_ev_leave = ( elm, cb ) => {
+		// console.log( 'ontouchstart called' );
 		elm.onmouseleave = cb;
-		elm.ontouchcancel = lev_end_fn( e );
+		elm.ontouchcancel = lev_end_fn( cb );
 	};
 } )();
 
-Math.clamp = Math.clamp !== undefined ? Math.clamp : ( x, y, z ) => Math.max( Math.min( x, z ), y );
+Math.clamp = !is_undef( Math.clamp ) ? Math.clamp : ( x, y, z ) => Math.max( Math.min( x, z ), y );
 
-"use strict";
+const __mailfn_init = () => {
+	const _name = document.querySelector( '#contact-form input[name="Name"]' );
+	const _email = document.querySelector( '#contact-form input[name="Email"]' );
+	const _phone = document.querySelector( '#contact-form input[name="Phone"]' );
+	const _content = document.querySelector( '#contact-form textarea' );
+	const output = document.querySelector( '#page-contact p' );
+	const original_text = output.innerHTML;
+	console.log( _name );
+
+	const this_fn = () => {
+		let errors = "";
+		const name = _name.value;
+		const email = _email.value;
+		const phone = _phone.value;
+		const content = _content.value;
+
+		console.log( name );
+		console.log( email );
+		console.log( phone );
+
+	// 	https://stackoverflow.com/questions/3968500/regex-to-validate-a-message-id-as-per-rfc2822
+		if ( !email.match( /^((([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)|(\"(([\x01-\x08\x0B\x0C\x0E-\x1F\x7F]|[\x21\x23-\x5B\x5D-\x7E])|(\\[\x01-\x09\x0B\x0C\x0E-\x7F]))*\"))@(([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)|(\[(([\x01-\x08\x0B\x0C\x0E-\x1F\x7F]|[\x21-\x5A\x5E-\x7E])|(\\[\x01-\x09\x0B\x0C\x0E-\x7F]))*\])))$/ ) )
+			errors += "<li>Please enter a valid (RFC2822 Compliant) email.</li><li style=\"margin-left:1.3em;list-style-type:circle;\" >\
+			If you don't know what that is, just only use ascii letters, numbers, '@', and '.' in your email.</li>";
+		if ( !name.match( /^[\w\u00C0-\uFFFF'\-\s]+$/u ) )
+			errors += "<li>Please enter a valid name (unicode is accepted).</li>";
+		if ( !phone.match( /^(\+\d)?((\(\d{3}\))|(\d{3}))[-\s\.]?\d{3}[-\s\.]?\d{4,6}$/ ) )
+			errors += "<li>Please enter a valid phone number.</li>";
+
+		if ( !errors ) {
+			content.replace( "\n", "%0A" );
+			content.replace( " ", "%0A" );
+			content.replace( "\t", "%09" );
+			content.replace( "&", "%26" );
+			content.replace( "%", "%25" );
+			content.replace( "?", "%3F" );
+			content.replace( "=", "%3D" );
+			email.replace( "&", "%26" );
+			email.replace( "%", "%25" );
+			email.replace( "?", "%3F" );
+			email.replace( "=", "%3D" );
+
+			window.open( 'https://mail.google.com/mail/u/0/?ui=2&tf=cm&fs=1&to=therealwastedwest@gmail.com&su=Fan%20Email&body=Name:%20'
+							+ name + '%0AEmail:%20' + email + '%0APhone:%20' + phone + "%0A%0A" + content, "_blank" );
+			output.innerHTML = original_text;
+			return true;
+		} else {
+			output.innerHTML = "There are errors in your form:<br /><ul>" + errors + "</ul>";
+			return false;
+		}
+	}
+
+	return this_fn;
+};
+var mailfn;
 
 // Need to execute this on the window load, so it's in a function.
 const fn = ( __bk_image, __mid_image, __fg_image ) => {
+	// deal with it
+	mailfn = __mailfn_init();
+
 	// Getting variables. For now it's webgl2, but honestly I don't need webgl2, so I might just revert it to webgl1.
 	// Edit: I did revert to webgl1 and it works fine.
 	const canvas = document.getElementById( "screen" );
 	const gl = ( () => {
 		let ret = canvas.getContext( 'webgl' );
-		if ( ret === undefined )	// fallback
+		if ( is_undef( ret ) )	// fallback
 			ret = canvas.getContext( 'experimental-webgl' );
 		return ret;
 	} )();
-	
-	if ( canvas === undefined ) console.err( "Your browser does not support Canvas." );
-	if ( gl === undefined ) console.err( "Your browser does not suppport WebGL." );
-	console.log( gl.getParameter( gl.VERSION ) );
-	
+
+	if ( is_undef( canvas ) ) console.err( "Your browser does not support Canvas." );
+	if ( is_undef( gl ) ) console.err( "Your browser does not suppport WebGL." );
+	// console.log( gl.getParameter( gl.VERSION ) );
+
 	let cw = canvas.clientWidth / 2;
 	let ch = canvas.clientHeight / 2;
-	
+
 	// global mouse coord and timing variables.
 	let tPrev = 0;
 	let tDelta = 0;
@@ -319,7 +386,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 			t_s = 1 - this.scale_y;
 		}
 
-		console.log( l_s + ", " + b_s + ", " + r_s + ", " + t_s );
+		// console.log( l_s + ", " + b_s + ", " + r_s + ", " + t_s );
 
 		this.bk_arr = new Float32Array( [
 			r_s, t_s,
@@ -359,7 +426,20 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 
 // 	const fg = new Layer( __fg_image, 0.08, 0, -1, fbs.fb1, 0.9 );	// fbs.fb2 is on 4
 // 	const mid = new Layer( __mid_image, 0.04, 1, 3, fbs.fb2, 0.9 );	// fbs.fb1 is on 3
-	const bkgd = new Layer( __bk_image, 0.02, 2, 4, null, 0.9 );
+// 	const bkgd = new Layer( __bk_image, 0.02, 2, 4, null, 0.9 );
+	const bkgd = new Layer( __bk_image, 0.02, 0, -1, null, 0.9 );
+
+	const mousemove = ( e ) => {
+		mx = -e.clientX / cw + 1;
+		my = -e.clientY / ch + 1;
+// 		touchy.mt_ev_move( window, null );
+	};
+
+	const mouseout = () => {
+		mx = 0;
+		my = 0;
+// 		touchy.mt_ev_leave( window, null );
+	};
 
 	const animate = ( tNow ) => {
 		tDelta = tNow - tPrev;
@@ -378,10 +458,14 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		bkgd.update();
 		bkgd.render();
 
-		window.onmousemove = mousemove;
+		touchy.mt_ev_move( window, mousemove );
 		animFrame = requestAnimationFrame( animate );
 		tPrev = tNow;
 	};
+	// so the touches get started properly.
+	touchy.mt_ev_start( window, e => true );
+	touchy.mt_ev_end( window, e => true );
+	touchy.mt_ev_leave( window, e => true );
 
 	/*
 	 * Events
@@ -390,8 +474,9 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	let active_page = undefined;
 	const fix_footer = ( nav_h ) => {
 		const footer = document.getElementById( 'footer' );
-		const base_h = canvas.clientHeight - footer.clientHeight;
-		const ap_h = active_page !== undefined ? ( nav_h + outerHeight( active_page ) ) : 0;
+		const base_h = window.innerHeight - footer.clientHeight;
+		const ap_h = !is_undef( active_page ) ? ( nav_h + outerHeight( active_page ) ) : 0;
+		// console.log( 'bh: ' + base_h + ', ah: ' + ap_h );
 		footer.style.top = ( Math.max( base_h, ap_h ) ) + 'px';
 	};
 
@@ -409,14 +494,6 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		// Apparently Pale Moon doesn't support CSS min, so we're doing it with JS.
 		const nav_height = document.getElementById( 'nav' ).clientHeight;
 		document.documentElement.style.setProperty( '--nav-height', nav_height + "px" );
-
-		// Fixing links that are being stupid.
-		const io_links = document.getElementsByClassName( 'link--io' );
-		if ( canvas.clientWidth > /*???*/ 0 ) {
-// 			io_links.
-		} else {
-
-		}
 
 		// resizing car container with right aspect ratio
 		const cc = document.getElementsByClassName( 'car-container' )[ 0 ];
@@ -484,6 +561,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 			audio_cont.style.width = '';
 		}
 
+		for ( let i = 0; i < update_scroll.length; i++ )
+			update_scroll[ i ] = true;
 		fix_footer( nav_height );
 
 		size_fbs();
@@ -492,17 +571,10 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 // 		fg.scale();
 	};
 
-	const mousemove = ( e ) => {
-		mx = -e.clientX / cw + 1;
-		my = -e.clientY / ch + 1;
-		window.onmousemove = null;
-	};
-
-	const mouseout = () => {
-		mx = 0;
-		my = 0;
-		window.onmousemove = null;
-	};
+	{
+		let chromeWarning = document.getElementById( 'chrome-notice' );
+		if ( !is_undef( window.chrome ) || window.navigator.userAgent.indexOf( 'Chrome' ) !== -1 ) chromeWarning.style.display = 'none';
+	}
 
 	const leavepage = ( e ) => {
 		cancelAnimationFrame( animFrame );
@@ -520,11 +592,11 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		const e_fn = ( e ) => {  };
 
 		const nav_out = ( page ) => {
-			console.log( page );
-			console.log( page_links[ 3 ].onclick );
-			if ( page.id === 'page-cast' && page_links[ 3 ].onclick !== undefined && page_links[ 3 ].onclick !== null ) {
+			// console.log( page );
+			// console.log( page_links[ 3 ].onclick );
+			if ( page.id === 'page-cast' && !is_undef(  page_links[ 3 ].onclick ) && page_links[ 3 ].onclick !== null ) {
 				const scope = page_links[ 3 ].onclick.bind( page_links[ 3 ] );
-				console.log( scope );
+				// console.log( scope );
 				setTimeout( () => scope(), 220 );
 			}
 
@@ -568,11 +640,11 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		const inter_page = ( page, p_old ) => {
 			if ( page === p_old ) return;
 
-			console.log( p_old );
-			console.log( page_links[ 3 ].onclick );
-			if ( p_old.id === 'page-cast' && page_links[ 3 ].onclick !== undefined && page_links[ 3 ].onclick !== null ) {
+			// console.log( p_old );
+			// console.log( page_links[ 3 ].onclick );
+			if ( p_old.id === 'page-cast' && !is_undef(  page_links[ 3 ].onclick ) && page_links[ 3 ].onclick !== null ) {
 				const scope = page_links[ 3 ].onclick.bind( page_links[ 3 ] );
-				console.log( scope );
+				// console.log( scope );
 				setTimeout( () => scope(), 220 );
 			}
 
@@ -695,11 +767,14 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		const car_elms = document.getElementsByClassName( "car-elm" );
 		const bio_disp = document.getElementsByClassName( "bio-master" )[ 0 ];
 		const bio_elms = document.getElementsByClassName( "bio-elm" );
+		const nav = document.getElementById( 'nav' );
 
 		const nav_to = ( num ) => {
 			window.location.hash = "#in-bio";
 
-			console.log( 'hash: '+window.location.hash );
+			// console.log( 'hash: '+window.location.hash );
+
+			setTimeout( () => { fix_footer( nav.clientHeight ); }, 320 );
 
 			for ( let i = 0; i < car_elms.length; i++ )
 				car_elms[ i ].onclick = undefined;
@@ -730,6 +805,8 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 				for ( let i = 0; i < car_elms.length; i++ )
 					car_elms[ i ].onclick = () => {nav_to( i );};
 			}, 300 );
+
+			setTimeout( () => { fix_footer( nav.clientHeight ); }, 320 );
 
 			cast_lin.onclick = undefined;
 			carousel.style.display = '';
@@ -768,18 +845,32 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 				left_but.onclick = ( e ) => { nav( -1 ); };
 				right_but.onclick = ( e ) => { nav( 1 ); };
 			}, 240 );
+// 			setTimeout( () => { update_scrollers(); }, 420 );
 
 			const new_elm = cur_elm + l_or_r;
 			if ( new_elm > audio_elms.length - aud_disp_elms || new_elm < 0 ) return;
 
-			const o_elm = l_or_r === 1 ? cur_elm : cur_elm + aud_disp_elms - 1;
-			const n_elm = l_or_r === 1 ? cur_elm + aud_disp_elms : new_elm;
+			let o_elm;
+			let n_elm;
+			if ( l_or_r === 1 ) {
+				o_elm = cur_elm;
+				n_elm = cur_elm + aud_disp_elms;
+				for ( let i = o_elm+1; i <= n_elm; i++ )
+					update_scroll[ i ] = true;
+			} else {
+				o_elm = cur_elm + aud_disp_elms - 1;
+				n_elm = new_elm;
+				for ( let i = n_elm; i < o_elm; i++ )
+					update_scroll[ i ] = true;
+			}
 
 			// shift all elms to the left or right (except the new one)
 			for ( let i = 0; i < n_elm; i++ )
 				audio_elms[ i ].style.left = ( ( i - new_elm ) * 100 / aud_disp_elms ) + '%';
 			for ( let i = n_elm + 1; i < audio_elms.length; i++ )
 				audio_elms[ i ].style.left = ( ( i - new_elm ) * 100 / aud_disp_elms ) + '%';
+
+			// console.log( audio_elms[ n_elm ].style.left );
 
 			// display the new one
 			audio_elms[ n_elm ].style.display = '';
@@ -796,7 +887,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 			setTimeout( () => {
 				audio_elms[ n_elm ].style.opacity = 1;
 				audio_elms[ n_elm ].style.left = ( ( n_elm - new_elm ) * 100 / aud_disp_elms ) + '%';
-			}, 1 );
+			}, 5 );
 
 			cur_elm = new_elm;
 		};
@@ -820,6 +911,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		right_but.onclick = ( e ) => { nav( 1 ); };
 	}
 
+	let update_scroll = [];
 	{
 		const players = document.getElementsByClassName( "audio-control" );
 		const srcs = document.querySelectorAll( 'audio' );
@@ -833,15 +925,21 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		const spos = Array.from( bpos ).map( e => e.children[ 0 ] );
 		const svol = Array.from( bvol ).map( e => e.children[ 0 ] );
 
-		const initfn = ( arr ) => Array.from( arr ).map( e => {
-			let rect = e.getBoundingClientRect();
-			return rect.left + window.scrollX;
-		} );
-		const page_listen = document.getElementById( 'page-listen' );
-		let bpscroll = undefined;
-		let bvscroll = undefined;
+		const bpos_left = new Array( bpos.length ).fill( 0 );
+		const bvol_left = new Array( bpos.length ).fill( 0 );
+		update_scroll = new Array( bpos.length ).fill( true );
+		const get_off = ( pos_vol, i ) => {
+			if ( update_scroll[ i ] === true ) {
+				const bpos_box = bpos[ i ].getBoundingClientRect();
+				const bvol_box = bvol[ i ].getBoundingClientRect();
+				bpos_left[ i ] = bpos_box.left;
+				bvol_left[ i ] = bvol_box.left;
+				update_scroll[ i ] = false;
+			}
+			return pos_vol ? bvol_left[ i ] : bpos_left[ i ];
+		};
 
-		for ( i in bpscroll ) console.log( "bpscroll: " + bpscroll[ i ] );
+		const page_listen = document.getElementById( 'page-listen' );
 
 		const slider_offset = 0;
 
@@ -851,20 +949,23 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 											   bpos[ i ].clientWidth - slider_offset ) + 'px';
 
 		const drag_slider_time = ( e, i ) => {
-			const slen = Math.clamp( e.clientX - bpscroll[ i ] - slider_offset, -slider_offset, bpscroll[ i ] - slider_offset );
+			const slen = Math.clamp( e.clientX - get_off( 0, i ) - slider_offset, -slider_offset, bpos[ i ].offsetWidth - slider_offset );
+			// console.log( 'slen: ' + slen );
+			// console.log( 'e.clientX: ' + e.clientX );
+			srcs[ i ].currentTime = ( slen / bpos[ i ].offsetWidth ) * srcs[ i ].duration;
 			slider_stub( spos[ i ], bpos[ i ], slen, i );
-			players[ i ].onmousemove = ( e ) => drag_slider_time( e, i );
+			touchy.mt_ev_move( players[ i ], ( e ) => drag_slider_time( e, i ) );
 		};
 		const drag_slider_vol = ( e, i ) => {
-			const slen = Math.clamp( e.clientX - bvscroll[ i ] - slider_offset, -slider_offset, bvscroll[ i ] - slider_offset );
-			srcs[ i ].volume = ( slen / bvol[ i ].clientWidth );
+			const slen = Math.clamp( e.clientX - get_off( 1, i ) - slider_offset, -slider_offset, bvol[ i ].offsetWidth- slider_offset );
+			srcs[ i ].volume = slen / bvol[ i ].offsetWidth;
 			slider_stub( svol[ i ], bvol[ i ], slen, i );
-			players[ i ].onmousemove = ( e ) => drag_slider_vol( e, i );
+			touchy.mt_ev_move( players[ i ], ( e ) => drag_slider_vol( e, i ) );
 		};
 		const slider_stub = ( slider, bar, slen, i ) => {
 			slider.style.left = slen + 'px';
-			players[ i ].onmouseleave = () => drag_cancel( i );
-			players[ i ].onmouseup = () => drag_cancel( i );
+			touchy.mt_ev_leave( players[ i ], () => drag_cancel( i ) );
+			touchy.mt_ev_end( players[ i ], () => drag_cancel( i ) );
 		};
 
 		const pp = ( i ) => {
@@ -886,34 +987,22 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		};
 
 		const drag_cancel = ( i ) => {
-			players[ i ].onmousemove = undefined;
-			players[ i ].onmouseleave = undefined;
-			players[ i ].onmouseup = undefined;
+			touchy.mt_ev_move( players[ i ], undefined );
+			touchy.mt_ev_leave( players[ i ], undefined );
+			touchy.mt_ev_end( players[ i ], undefined );
 		};
 
 		for ( let i = 0; i < players.length; i++ ) {
 			const perm_i = i;
-			bpos[ i ].onmousedown = ( e ) => drag_slider_time( e, i );
-			bvol[ i ].onmousedown = ( e ) => drag_slider_vol( e, i );
-			spos[ i ].onmousedown = ( e ) => drag_slider_time( e, i );
-			svol[ i ].onmousedown = ( e ) => drag_slider_vol( e, i );
+			touchy.mt_ev_start( bpos[ i ], ( e ) => drag_slider_time( e, i ) );
+			touchy.mt_ev_start( bvol[ i ], ( e ) => drag_slider_vol( e, i ) );
+			touchy.mt_ev_start( spos[ i ], ( e ) => drag_slider_time( e, i ) );
+			touchy.mt_ev_start( svol[ i ], ( e ) => drag_slider_vol( e, i ) );
 			svol[ i ].style.left = 100 + '%';
 			pps[ i ].onclick = () => pp( i );
 			srcs[ i ].ontimeupdate = () => update_time( i );
 			srcs[ i ].onended = () => pb_ended( i );
 			plays[ i ].style.display = 'none';
-
-			new IntersectionObserver( ( ent, obs ) => {
-				for ( j in ent ) {
-					if ( ent[ j ].intersectionRatio > 0 ) {
-						srcs[ j ].load();
-						bpscroll = initfn( bpos );
-						bvscroll = initfn( bvol );
-						obs.disconnect();
-						break;
-					}
-				}
-			} ).observe( players[ i ] );
 		}
 	}
 
@@ -945,11 +1034,12 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	let mid_load = true;
 	let fg_load = true;
 	let window_load = false;
+	let fn_called = false;
 
-	window.onload = () => { window_load = true; if ( bk_load && mid_load && fg_load ) { fn( bk_image, mid_image, fg_image ); } console.log( "window" ); };
-	bk_image.onload = () => { bk_load = true; if ( window_load && mid_load && fg_load ) { fn( bk_image, mid_image, fg_image ); } console.log( "bk" ); };
-	mid_image.onload = () => { mid_load = true; if ( bk_load && window_load && fg_load ) { fn( bk_image, mid_image, fg_image ); } console.log( "mid" ); };
-	fg_image.onload = () => { fg_load = true; if ( bk_load && mid_load && window_load ) fn( bk_image, mid_image, fg_image ); console.log( "fg" ); };
+	/*window.onload*/document.onreadystatechange = () => { if ( document.readyState === 'interactive' ) window_load = true; if ( bk_load && mid_load && fg_load && !fn_called ) { fn( bk_image, mid_image, fg_image ); fn_called = true; } /* console.log( "window" ); */ };
+	bk_image.onload = () => { bk_load = true; if ( window_load && mid_load && fg_load && !fn_called ) { fn( bk_image, mid_image, fg_image ); fn_called = true; } /* console.log( "bk" ); */ };
+// 	mid_image.onload = () => { mid_load = true; if ( bk_load && window_load && fg_load ) { fn( bk_image, mid_image, fg_image ); fn_called = true; console.log( "mid" ); } };
+// 	fg_image.onload = () => { fg_load = true; if ( bk_load && mid_load && window_load ) { fn( bk_image, mid_image, fg_image ); fn_called = true; console.log( "fg" ); } };
 
 	bk_image.crossOrigin = 'anonymous';
 // 	mid_image.crossOrigin = 'anonymous';
