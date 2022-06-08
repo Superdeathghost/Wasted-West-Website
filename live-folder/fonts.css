@@ -1,18 +1,43 @@
 
 /* submenu */
-@import url( 'https://fonts.googleapis.com/css2?family=Alata&display=swap' );
+/* @import url( 'https://fonts.googleapis.com/css2?family=Alata&display=swap' ); */
 /* text */
-@import url( 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap' );
+/* @import url( 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap' ); */
 /* former title */
-@import url( 'https://fonts.googleapis.com/css2?family=Oleo+Script&display=swap' );
+/* @import url( 'https://fonts.googleapis.com/css2?family=Oleo+Script&display=swap' ); */
 
-@import url( 'https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap' );
+/*@import url( 'https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap' );
 
 @import url( 'https://fonts.googleapis.com/css2?family=Syne+Tactile&display=swap' );
 
-@import url( 'https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@300&display=swap' );
+@import url( 'https://fonts.googleapis.com/css2?family=Noto+Serif+Display:wght@300&display=swap' );*/
 
+/* title */
 @font-face {
-	font-family: tit-font;
+	font-family: 'tit-font';
     src: url("Assets/fonts/gomarice_nandaka_western.ttf");
+}
+
+/* menu */
+@font-face {
+	font-family: 'Alata';
+    src: url("Assets/fonts/Alata-Regular.ttf");
+}
+
+/* normal text */
+@font-face {
+	font-family: 'Montserrat';
+    src: url("Assets/fonts/Montserrat-VariableFont_wght.ttf") format('truetype');
+	font-style: normal;
+}
+@font-face {
+	font-family: 'Montserrat';
+    src: url("Assets/fonts/Montserrat-Italic-VariableFont_wght.ttf") format('truetype');
+	font-style: italic;
+}
+
+/* subtitles */
+@font-face {
+	font-family: 'Noto Serif Display';
+	src: url("Assets/fonts/NotoSerifDisplay_SemiCondensed-Bold.ttf")
 }
