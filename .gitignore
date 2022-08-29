@@ -1,1 +1,3 @@
-important_info.txt
+.*
+!README.md
+!live-folder/
