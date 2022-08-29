@@ -109,13 +109,12 @@ a {
     font-family: tit-font;
 /* 	background-image: linear-gradient( to bottom, rgba(255, 255, 255, 0.6), rgba(136, 221, 247, 0.4) ); */
 }
-@media screen and (min-width: 700px) { #link-home { font-size: 6.22em; } }
-@media screen and (max-width: 700px), screen and (max-height: 640px) { #link-home { font-size: 14.2vmin; } }
+@media screen and (min-width: 700px) { #link-home { font-size: 6.22em; } #link-home a { line-height: 6.66rem; } }
+@media screen and (max-width: 700px), screen and (max-height: 640px) { #link-home { font-size: 14.2vmin; } #link-home a { line-height: 15.2vmin; } }
 
 #link-home a {
 	white-space: normal;
 	display: inline-block;
-	line-height: 6.66rem;
 }
 
 a {
@@ -483,7 +482,6 @@ a {
 	display: inline-block;
 	height: 16px;
 	position: relative;
-	margin-right: 4%;
 	top: -12px;
 }
 .aud-subbar {
@@ -493,8 +491,8 @@ a {
 	height: 4px;
 	width: 100%;
 }
-.aud-pos { width: 60%; }
-.aud-vol { width: 20%; }
+.aud-pos { width: 52%; margin-right: 10%; }
+.aud-vol { width: 18%; margin-right: 3%; }
 
 .aud-title { align-self: center; width: 90%; }
 .aud-descr {
@@ -513,6 +511,16 @@ a {
 	top: 0px;
 	position: relative;
 }
+.aud-mt-umt {
+	display: inline-block;
+	position: relative;
+	top: -6px;
+	height: 28px;
+	width: 28px;
+}
+/*.aud-mt-umt path {
+	stroke: #000;
+}*/
 
 .aud-pp {
 	place-self: center;
@@ -520,6 +528,7 @@ a {
 	border-radius: 100%;
 	background-image: linear-gradient( -45deg, #ceae5c, #c69415 );;
 }
+
 audio {
 	display: none;
 }
@@ -554,7 +563,6 @@ audio {
 	stroke-width: 0.1;
 	stroke-linejoin: round;
 	stroke-linecap: round;
-	transition: stroke 0.2s;
 }
 .audio-btn:hover .el-btn {
 	stroke: #444;
