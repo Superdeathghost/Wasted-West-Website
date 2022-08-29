@@ -28,11 +28,13 @@
 @font-face {
 	font-family: 'Montserrat';
     src: url("Assets/fonts/Montserrat-VariableFont_wght.ttf") format('truetype');
+	font-weight: 400 500;
 	font-style: normal;
 }
 @font-face {
 	font-family: 'Montserrat';
     src: url("Assets/fonts/Montserrat-Italic-VariableFont_wght.ttf") format('truetype');
+	font-weight: 400 500;
 	font-style: italic;
 }
 

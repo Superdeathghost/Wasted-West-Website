@@ -18,13 +18,12 @@ function outerHeight ( element ) {
 
 const is_undef = ( c ) => c === undefined || c === null;
 
+// mini touch event framework
 const touchy = new ( function () {
 	let cur_touch = undefined;
 	this.mt_ev_start = ( elm, cb ) => {
 		elm.onmousedown = cb;
 		elm.ontouchstart = !is_undef( cb ) ? ( ( e ) => {
-			// console.log( 'ontouchstart called' );
-// 			e.preventDefault();
 			if ( is_undef( cur_touch ) ) {
 				cur_touch = e.changedTouches[ 0 ];
 				cb( cur_touch );
@@ -34,8 +33,6 @@ const touchy = new ( function () {
 	this.mt_ev_move = ( elm, cb ) => {
 		elm.onmousemove = cb;
 		elm.ontouchmove = !is_undef( cb ) ? ( ( e ) => {
-			// console.log( 'ontouchmove called' );
-// 			e.preventDefault();
 			if ( !is_undef( cur_touch ) && cur_touch.identifier === e.changedTouches[ 0 ].identifier ) {
 				cur_touch = e.changedTouches[ 0 ];
 				cb( cur_touch );
@@ -48,7 +45,6 @@ const touchy = new ( function () {
 				cb( cur_touch );
 				cur_touch = undefined;
 			}
-			// console.log( 'ontouchleave/end called' );
 		} ) : cb );
 	};
 	this.mt_ev_end = ( elm, cb ) => {
@@ -56,7 +52,6 @@ const touchy = new ( function () {
 		elm.ontouchend = lev_end_fn( cb );
 	};
 	this.mt_ev_leave = ( elm, cb ) => {
-		// console.log( 'ontouchstart called' );
 		elm.onmouseleave = cb;
 		elm.ontouchcancel = lev_end_fn( cb );
 	};
@@ -71,7 +66,6 @@ const __mailfn_init = () => {
 	const _content = document.querySelector( '#contact-form textarea' );
 	const output = document.querySelector( '#page-contact p' );
 	const original_text = output.innerHTML;
-	console.log( _name );
 
 	const this_fn = () => {
 		let errors = "";
@@ -80,17 +74,13 @@ const __mailfn_init = () => {
 		const phone = _phone.value;
 		const content = _content.value;
 
-		console.log( name );
-		console.log( email );
-		console.log( phone );
-
 	// 	https://stackoverflow.com/questions/3968500/regex-to-validate-a-message-id-as-per-rfc2822
 		if ( !email.match( /^((([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)|(\"(([\x01-\x08\x0B\x0C\x0E-\x1F\x7F]|[\x21\x23-\x5B\x5D-\x7E])|(\\[\x01-\x09\x0B\x0C\x0E-\x7F]))*\"))@(([a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*)|(\[(([\x01-\x08\x0B\x0C\x0E-\x1F\x7F]|[\x21-\x5A\x5E-\x7E])|(\\[\x01-\x09\x0B\x0C\x0E-\x7F]))*\])))$/ ) )
 			errors += "<li>Please enter a valid (RFC2822 Compliant) email.</li><li style=\"margin-left:1.3em;list-style-type:circle;\" >\
 			If you don't know what that is, just only use ascii letters, numbers, '@', and '.' in your email.</li>";
 		if ( !name.match( /^[\w\u00C0-\uFFFF'\-\s]+$/u ) )
 			errors += "<li>Please enter a valid name (unicode is accepted).</li>";
-		if ( !phone.match( /^(\+\d)?((\(\d{3}\))|(\d{3}))[-\s\.]?\d{3}[-\s\.]?\d{4,6}$/ ) )
+		if ( !phone.match( /^((\+\d)?((\(\d{3}\))|(\d{3}))[-\s\.]?\d{3}[-\s\.]?\d{4,6})|()$/ ) )
 			errors += "<li>Please enter a valid phone number.</li>";
 
 		if ( !errors ) {
@@ -107,7 +97,7 @@ const __mailfn_init = () => {
 			email.replace( "=", "%3D" );
 
 			window.open( 'https://mail.google.com/mail/u/0/?ui=2&tf=cm&fs=1&to=therealwastedwest@gmail.com&su=Fan%20Email&body=Name:%20'
-							+ name + '%0AEmail:%20' + email + '%0APhone:%20' + phone + "%0A%0A" + content, "_blank" );
+							+ name + '%0AEmail:%20' + email + (phone ? '%0APhone:%20' : '') + (phone ? phone : '') + "%0A%0A" + content, "_blank" );
 			output.innerHTML = original_text;
 			return true;
 		} else {
@@ -438,7 +428,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 	const mouseout = () => {
 		mx = 0;
 		my = 0;
-// 		touchy.mt_ev_leave( window, null );
+		touchy.mt_ev_move( window, null );
 	};
 
 	const animate = ( tNow ) => {
@@ -546,7 +536,6 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 				e.style.minWidth = s1; } );
 			Array.from( document.getElementsByClassName( 'audio-control' ) ).forEach( ( e ) => {
 				e.style.minWidth = s2; e.style.height = s3 + 'px'; } );
-			ad_c_set_flag = 0;
 		} else if ( canvas.clientWidth < 740 ) {
 			update_aud_disp( 1 );
 			audio_cont.style.minWidth = 1.1*320 + 'px';
@@ -911,6 +900,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		right_but.onclick = ( e ) => { nav( 1 ); };
 	}
 
+	// audio ctl
 	let update_scroll = [];
 	{
 		const players = document.getElementsByClassName( "audio-control" );
@@ -924,6 +914,10 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		// position and volume sliders
 		const spos = Array.from( bpos ).map( e => e.children[ 0 ] );
 		const svol = Array.from( bvol ).map( e => e.children[ 0 ] );
+
+		const mute_svg = document.getElementsByClassName( "aud-mt-umt" );
+		const mute = document.getElementsByClassName( "aud-mute" );
+		const unmute = document.getElementsByClassName( "aud-unmute" );
 
 		const bpos_left = new Array( bpos.length ).fill( 0 );
 		const bvol_left = new Array( bpos.length ).fill( 0 );
@@ -942,6 +936,18 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 		const page_listen = document.getElementById( 'page-listen' );
 
 		const slider_offset = 0;
+
+		const mute_unmute = ( i ) => {
+			if ( srcs[ i ].muted === true ) {
+				mute[ i ].style.display = 'none';
+				unmute[ i ].style.display = '';
+				srcs[ i ].muted = false;
+			} else {
+				mute[ i ].style.display = '';
+				unmute[ i ].style.display = 'none';
+				srcs[ i ].muted = true;
+			}
+		}
 
 		const update_time = ( i ) =>
 			spos[ i ].style.left = Math.clamp( srcs[ i ].currentTime * bpos[ i ].clientWidth /
@@ -998,11 +1004,13 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 			touchy.mt_ev_start( bvol[ i ], ( e ) => drag_slider_vol( e, i ) );
 			touchy.mt_ev_start( spos[ i ], ( e ) => drag_slider_time( e, i ) );
 			touchy.mt_ev_start( svol[ i ], ( e ) => drag_slider_vol( e, i ) );
+			mute_svg[ i ].onclick = ( e ) => { mute_unmute( i ) };
 			svol[ i ].style.left = 100 + '%';
 			pps[ i ].onclick = () => pp( i );
 			srcs[ i ].ontimeupdate = () => update_time( i );
 			srcs[ i ].onended = () => pb_ended( i );
 			plays[ i ].style.display = 'none';
+			mute[ i ].style.display = 'none';
 		}
 	}
 
