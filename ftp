@@ -1,0 +1,41 @@
+#!/bin/bash
+
+host=$1
+user=$2
+pswd=$3
+hdir=$4
+port=${5:-21}
+bdir=${6:-''}
+
+for i in $(find live-folder/$bdir | sed 's/ /__SPACE__/'); do
+	j="$(echo $i | sed 's/__SPACE__/ /')"
+	l="$(echo $j | sed 's|live-folder/||')"
+	# no skip
+	if [[ $l == *'s1'* ]]; then
+		echo "MOVING $j"
+		if [[ -d "$j" ]]; then
+			echo "$j is a DIRECTORY"
+			ftp "ftp://$user:$pswd@$host:$port" <<< "cd $hdir"$'\n'"mkdir \"$l\""$'\n'"exit"
+# 			ftp_pid=$!
+# 			for (( i=33; i>0; i-- )); do
+# 				echo "SLEEP FOR $i SECONDS"
+# 				sleep 1
+# 			done
+# 			kill -SIGTERM $!
+		else
+			echo "$j is a FILE"
+			ftp "ftp://$user:$pswd@$host:$port" <<< "cd $hdir"$'\n'"send \"$j\" \"$l\""$'\n'"exit"
+# 			ftp_pid=$!
+# 			for (( i=33; i>0; i-- )); do
+# 				echo "SLEEP FOR $i SECONDS"
+# 				sleep 1
+# 			done
+# 			kill -SIGTERM $!
+		fi
+		echo "MOVED $j"
+	else
+		echo "SKIPPED $j"
+	fi
+# 	echo "2 MORE SECONDS"
+# 	sleep 2
+done
