@@ -710,7 +710,7 @@ const fn = ( __bk_image, __mid_image, __fg_image ) => {
 				const ld = car_divs[ lnum ];
 				return ( () => { ld.style.display = 'none'; } );
 			};
-			setTimeout( scope_bubble(), 290 );
+			setTimeout( scope_bubble(), 320 );
 
 			car_divs[ num ].classList.remove( 'car-div-kill' );
 			car_divs[ num ].classList.remove( 'car-div-disappearr' );
