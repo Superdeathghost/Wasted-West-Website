@@ -361,15 +361,15 @@ a {
 .car-div-disappear {
 	opacity: 0; }
 .car-div-disappearl {
-	transform: translate3d( -40%, 0, 0 ); }
+	transform: translate3d( -70%, 0, 0 ); }
 .car-div-disappearr {
-	transform: translate3d( 40%, 0, 0 ); }
+	transform: translate3d( 70%, 0, 0 ); }
 .car-div-setl {
-	transition: none;
-	transform: translate3d( -40%, 0, 0 ); }
+/* 	transition: none; */
+	transform: translate3d( -70%, 0, 0 ); }
 .car-div-setr {
-	transition: none;
-	transform: translate3d( 40%, 0, 0 ); }
+/* 	transition: none; */
+	transform: translate3d( 70%, 0, 0 ); }
 
 .car-elm {
 	width: 90%;
